@@ -3,18 +3,17 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-const swaggerUi = require("swagger-ui-express"),
-  swaggerDocument = require("./swagger.json");
-var mongoose = require("mongoose");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
+
 var app = express();
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // Swagger UI
-
-app.listen(8000);
+// swagger setup
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -45,28 +44,4 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-// mongoose
-var user = "wilyfreddie";
-var password = "G5610029L";
-var host = "rainflow.live";
-var database = "rainflow";
-var port = 27017;
-var mongoDBURI = "mongodb://" + `${host}:${port}/${database}`;
-console.log(mongoDBURI);
-
-mongoose.connect("mongodb://rainflow.live:27017/rainflow", {
-  auth: { authSource: "admin" },
-  user: user,
-  pass: password,
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-var db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error: "));
-db.on("connected", () => {
-  console.log(`Connected to ${mongoDBURI}`);
-});
-db.on("disconnected", () => {
-  console.log("Disconnected from MongoDB.");
-});
 module.exports = app;
