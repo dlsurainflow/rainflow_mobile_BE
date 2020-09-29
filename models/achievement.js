@@ -1,16 +1,18 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+module.exports = (sequelize, Sequelize) => {
+  const mobile_achievements = sequelize.define("mobile_achievements", {
+    // title: {
+    //   Type: Sequelize.STRING(50),
+    // },
+    // description: {
+    //   type: Sequelize.STRING(50),
+    // },
+    criteria: {
+      type: Sequelize.JSONB,
+    },
+    points: {
+      type: Sequelize.INTEGER,
+    },
+  });
 
-var achievementSchema = new Schema(
-  {
-    title: String,
-    description: String,
-    criteria: String,
-    points: Number,
-    badge: { data: Buffer, contentType: String },
-  },
-  { timetamps: true }
-);
-
-// Export the model
-module.exports = mongoose.model("Achievement", achievementSchema);
+  return mobile_achievements;
+};

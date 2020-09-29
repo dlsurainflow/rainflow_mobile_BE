@@ -1,18 +1,39 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+/* jshint indent: 2 */
 
-var userSchema = new Schema(
-  {
-    // id: { type: Integer, index: { unique: true } },
-    username: String,
-    email: String,
-    password: String,
-    roleIntID: Number,
-    tenantID: String,
-    achievements: [{ type: Schema.Types.ObjectId, ref: "achievement" }],
-  },
-  { timetamps: true }
-);
-
-// Export the model
-module.exports = mongoose.model("User", userSchema);
+module.exports = function (sequelize, DataTypes) {
+  return sequelize.define(
+    "mobile_user",
+    {
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      roleIntID: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      tenantID: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      points: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+    },
+    {
+      sequelize,
+      tableName: "mobile_user",
+      schema: "public",
+    }
+  );
+};

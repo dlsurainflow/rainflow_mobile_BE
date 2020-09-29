@@ -2,7 +2,7 @@
 
 module.exports = function (sequelize, DataTypes) {
   return sequelize.define(
-    "mobile_reports",
+    "mobile_report_history",
     {
       id: {
         autoIncrement: true,
@@ -10,42 +10,38 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         primaryKey: true,
       },
+      user: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       latitude: {
         type: DataTypes.DOUBLE,
-        allowNull: true,
+        allowNull: false,
       },
       longitude: {
         type: DataTypes.DOUBLE,
-        allowNull: true,
+        allowNull: false,
       },
       rainfall_rate: {
         type: DataTypes.DOUBLE,
-        allowNull: true,
+        allowNull: false,
       },
       flood_depth: {
         type: DataTypes.DOUBLE,
-        allowNull: true,
+        allowNull: false,
       },
       upvote: {
-        type: DataTypes.JSONB,
+        type: DataTypes.JSON,
         allowNull: true,
       },
       downvote: {
-        type: DataTypes.JSONB,
+        type: DataTypes.JSON,
         allowNull: true,
-      },
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
-      updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
       },
     },
     {
       sequelize,
-      tableName: "mobile_reports",
+      tableName: "mobile_report_history",
       schema: "public",
     }
   );
