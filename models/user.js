@@ -9,7 +9,7 @@ var userSchema = new Schema(
     password: String,
     roleIntID: Number,
     tenantID: String,
-    achievements: [{ type: Schema.Types.ObjectId, ref: "achievements" }],
+    achievements: [{ type: Schema.Types.ObjectId, ref: "achievement" }],
   },
   { timetamps: true }
 );
