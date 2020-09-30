@@ -10,9 +10,6 @@ var cors = require("cors");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-
 var corsOptions = {
   origin: "http://localhost:8081",
 };
@@ -56,8 +53,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var reportRouter = require("./routes/report");
+
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/report", reportRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

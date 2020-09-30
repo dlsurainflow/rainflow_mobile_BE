@@ -11,7 +11,7 @@ module.exports = function (sequelize, DataTypes) {
         primaryKey: true,
       },
       user: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       latitude: {
@@ -43,6 +43,7 @@ module.exports = function (sequelize, DataTypes) {
       sequelize,
       tableName: "mobile_report_history",
       schema: "public",
+      timestamp: true,
     }
   );
 };
