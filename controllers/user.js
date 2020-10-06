@@ -1,5 +1,4 @@
-const db = require("../models");
-const User = db.user;
+const { User } = require("./models");
 const Op = db.Sequelize.Op;
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
