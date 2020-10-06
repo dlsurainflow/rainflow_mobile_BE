@@ -11,7 +11,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
 var corsOptions = {
-  origin: "http://localhost:8081",
+  origin: "http://rainflow.live/api",
 };
 
 var app = express();
@@ -44,7 +44,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
-app.listen(8081);
+app.listen(8085);
 app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
