@@ -113,9 +113,6 @@ async function reportExists(reportID) {
 
 exports.deleteVote = async (req, res) => {
   console.log(req.body);
-  if (jwt.verify(req.body.token, config.secret)) {
-  }
-
   jwt.verify(req.body.token, config.secret, function (err, decoded) {
     if (err) {
       res.status(400).send({
@@ -123,6 +120,15 @@ exports.deleteVote = async (req, res) => {
         message: err.message,
       });
     } else {
+      Vote.findOne({
+        where: { reportID: req.body.reportID, userID: decoded.id },
+      }).then((report) => {
+        Vote.destroy({ where: { id: report.id } }).then((response) => {
+          res.status(200).json({
+            status: "Success",
+          });
+        });
+      });
       // const report = Report.create({
       //   latitude: req.body.latitude,
       //   longitude: req.body.longitude,
@@ -137,7 +143,10 @@ exports.deleteVote = async (req, res) => {
 };
 
 exports.returnAll = async (req, res) => {
-  Report.findAll({ raw: true }).then(function (report) {
+  Report.findAll({
+    raw: true,
+    include: [{ model: User, attributes: ["username"] }],
+  }).then(function (report) {
     console.log(report);
     res.status(200).json(report);
   });
@@ -152,18 +161,18 @@ exports.findByID = async (req, res) => {
           message: err.message,
         });
       } else {
-        console.log(decoded.id);
+        // console.log(decoded.id);
         // const decoded = JSON.dec
         // console.log(jwt.decode(req.body.token, { complete: true }));
         Report.findOne({ where: { id: req.params.id } }).then((report) => {
-          console.log(report);
+          // console.log(report);
           Vote.count({
             where: {
               reportID: req.params.id,
               action: "upvote",
             },
           }).then((upvote) => {
-            console.log(upvote);
+            // console.log(upvote);
             Vote.count({
               where: {
                 reportID: req.params.id,
@@ -194,14 +203,14 @@ exports.findByID = async (req, res) => {
     });
   } else {
     Report.findOne({ where: { id: req.params.id } }).then((report) => {
-      console.log(report);
+      // console.log(report);
       Vote.count({
         where: {
           reportID: req.params.id,
           action: "upvote",
         },
       }).then((upvote) => {
-        console.log(upvote);
+        // console.log(upvote);
         Vote.count({
           where: {
             reportID: req.params.id,
