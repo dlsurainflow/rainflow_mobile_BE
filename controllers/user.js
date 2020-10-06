@@ -29,7 +29,7 @@ exports.authenticate = async (req, res) => {
           )
         ) {
           const token = jwt.sign({ id: user.id }, config.secret, {
-            expiresIn: "24h",
+            expiresIn: "3d",
           });
           res.json({
             status: "Success",
