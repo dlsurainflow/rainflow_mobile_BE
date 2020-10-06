@@ -39,47 +39,19 @@ exports.returnAll = async (req, res) => {
     res.status(200).json(report);
   });
 };
-// exports.authenticate = async (req, res) => {
-//   console.log(req.body);
-//   try {
-//     await User.findOne({ where: { username: req.body.username } }).then(
-//       (user) => {
-//         if (!user) {
-//           res.status(400).send({
-//             status: "Error",
-//             message: "Cannot login with provided credentials",
-//           });
-//         }
 
-//         if (bcrypt.compareSync(req.body.password, user.password)) {
-//           const token = jwt.sign({ id: user.id }, config.secret, {
-//             expiresIn: "1h",
-//           });
-//           res.json({
-//             status: "Success",
-//             data: {
-//               username: user.username,
-//               email: user.email,
-//               tenantID: user.tenantID,
-//               points: user.points,
-//               token: token,
-//             },
-//           });
-//         } else {
-//           res.status(400).send({
-//             status: "Error",
-//             message: "Cannot login with provided credentials",
-//           });
-//         }
-//       }
-//     );
-//     console.log("User: " + user);
-//   } catch (err) {
-//     console.log("Error: " + err);
-//   }
-// };
+exports.findByID = async (req, res) => {
+  Report.findAll({ where: { id: req.params.userID } }).then(function (report) {
+    console.log(report);
+    res.status(200).json(report);
+  });
+};
 
-// Update a Tutorial by the id in the request
-exports.update = (req, res) => {
-  // this.password = bcrypt.hashSync(this.password, saltRounds);
+exports.findByUsername = async (req, res) => {
+  Report.findAll({ where: { username: req.params.username } }).then(function (
+    report
+  ) {
+    console.log(report);
+    res.status(200).json(report);
+  });
 };
