@@ -32,13 +32,17 @@ client.query("SELECT * FROM users", (error, results) => {
   } else {
     console.log(results.rows);
     for (var i = 0; i < results.rows.length; i++) {
+      const time = new Date().toISOString();
       var queryString =
-        "INSERT INTO mobile_user (\"username\", \"email\", \"password\", \"roleIntID\", \"tenantID\") VALUES (" +
-        `'${results.rows[i].username}', '${results.rows[i].email}', '${results.rows[i].password}', '${results.rows[i].roleIntID}', '${results.rows[i].tenantID}');`;
-
+        'INSERT INTO "Users" ("username", "email", "password", "roleIntID", "tenantID", "createdAt", "updatedAt") VALUES (' +
+        `'${results.rows[i].username}', '${results.rows[i].email}', '${results.rows[i].password}', '${results.rows[i].roleIntID}', '${results.rows[i].tenantID}', '${time}', '${time}');`;
+      // var queryString =
+      //   'INSERT INTO USERS (username, email, password, roleIntID, tenantID, createdAt, updatedAt") VALUES (' +
+      //   `${results.rows[i].username}, ${results.rows[i].email}, ${results.rows[i].password}, ${results.rows[i].roleIntID}, ${results.rows[i].tenantID}, ${results.rows[i].createAt}, ${results.rows[i].updateAt});`;
       console.log(queryString);
       var query = client2.query(queryString, function (error, result) {
-        console.log(result);
+        if (error) console.log(error);
+        else console.log(result);
       });
     }
   }
