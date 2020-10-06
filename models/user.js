@@ -1,39 +1,39 @@
-/* jshint indent: 2 */
-
-module.exports = function (sequelize, DataTypes) {
-  return sequelize.define(
-    "mobile_user",
+"use strict";
+const { Model } = require("sequelize");
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      // define association here
+      this.hasMany(models.Report, {
+        foreignKey: "userID",
+      });
+      this.hasMany(models.ReportHistory, {
+        foreignKey: "userID",
+      });
+      this.hasMany(models.Vote, {
+        foreignKey: "userID",
+      });
+    }
+  }
+  User.init(
     {
-      username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      roleIntID: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      tenantID: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      points: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-      },
+      username: DataTypes.STRING,
+      email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      roleIntID: DataTypes.INTEGER,
+      tenantID: DataTypes.STRING,
+      points: DataTypes.INTEGER,
     },
     {
       sequelize,
-      tableName: "mobile_user",
-      schema: "public",
+      modelName: "User",
+      timestamp: true,
     }
   );
+  return User;
 };

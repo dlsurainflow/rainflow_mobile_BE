@@ -1,6 +1,6 @@
-const db = require("../models");
-const User = db.user;
-const Op = db.Sequelize.Op;
+const { User } = require("../models");
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
@@ -23,11 +23,12 @@ exports.authenticate = async (req, res) => {
 
         if (bcrypt.compareSync(req.body.password, user.password)) {
           const token = jwt.sign({ id: user.id }, config.secret, {
-            expiresIn: "1h",
+            expiresIn: "24h",
           });
           res.json({
             status: "Success",
             data: {
+              userID: user.id,
               username: user.username,
               email: user.email,
               tenantID: user.tenantID,

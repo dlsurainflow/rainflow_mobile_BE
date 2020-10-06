@@ -16,5 +16,10 @@ router.get("/", function (req, res, next) {
 
 router.post("/submit", reportController.submitReport);
 router.get("/all", reportController.returnAll);
+router.get("/user/:userID", reportController.findByUserID);
+router.get("/:id", reportController.findByID);
+router.post("/vote", reportController.voteReport);
+router.delete("/vote", reportController.deleteVote);
+// router.get("/username/:username", reportController.findByUsername);
 
 module.exports = router;
