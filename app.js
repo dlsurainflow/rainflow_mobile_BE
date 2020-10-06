@@ -77,4 +77,6 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
+console.log("App is listening on port 8085.");
+
 module.exports = app;

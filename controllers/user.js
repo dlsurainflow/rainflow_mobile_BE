@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
+var SHA256 = require("crypto-js/sha256");
 
 // Create and Save a new Tutorial
 exports.create = (req, res) => {};
@@ -21,7 +22,12 @@ exports.authenticate = async (req, res) => {
           });
         }
 
-        if (bcrypt.compareSync(req.body.password, user.password)) {
+        if (
+          bcrypt.compareSync(
+            SHA256(req.body.password).toString(),
+            user.password
+          )
+        ) {
           const token = jwt.sign({ id: user.id }, config.secret, {
             expiresIn: "24h",
           });
