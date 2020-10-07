@@ -7,7 +7,6 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
 var SHA256 = require("crypto-js/sha256");
 
-// Create and Save a new Tutorial
 exports.create = (req, res) => {};
 
 exports.authenticate = async (req, res) => {
@@ -29,7 +28,7 @@ exports.authenticate = async (req, res) => {
           )
         ) {
           const token = jwt.sign({ id: user.id }, config.secret, {
-            expiresIn: "3d",
+            expiresIn: "3dguit",
           });
           res.json({
             status: "Success",
@@ -56,7 +55,6 @@ exports.authenticate = async (req, res) => {
   }
 };
 
-// Update a Tutorial by the id in the request
 exports.update = (req, res) => {
   // this.password = bcrypt.hashSync(this.password, saltRounds);
 };
