@@ -1,54 +1,60 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('RAFTs', {
+    await queryInterface.createTable("RAFTs", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       latitude: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       longitude: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       altitude: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       flood_depth: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       rainfall_amount: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       temperature: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       pressure: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       humidity: {
-        type: Sequelize.FLOAT
+        type: Sequelize.FLOAT,
       },
       deviceID: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       tenantID: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+      },
+      polyID: {
+        type: Sequelize.STRING,
+      },
+      username: {
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('RAFTs');
-  }
+    await queryInterface.dropTable("RAFTs");
+  },
 };
