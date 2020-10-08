@@ -28,7 +28,7 @@ exports.authenticate = async (req, res) => {
           )
         ) {
           const token = jwt.sign({ id: user.id }, config.secret, {
-            expiresIn: "3dguit",
+            expiresIn: "3d",
           });
           res.json({
             status: "Success",
