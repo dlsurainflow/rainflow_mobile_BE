@@ -38,15 +38,36 @@ exports.submitReport = async (req, res) => {
         message: err.message,
       });
     } else {
-      const report = Report.create({
-        latitude: req.body.latitude,
-        longitude: req.body.longitude,
-        rainfall_rate: req.body.rainfall_rate,
-        flood_depth: req.body.flood_depth,
-        userID: decoded.id,
-      })
-        .then((_report) => res.status(201).send(_report))
-        .catch((err) => res.status(400).send(err));
+      if (!req.files) {
+        const report = Report.create({
+          latitude: req.body.latitude,
+          longitude: req.body.longitude,
+          rainfall_rate: req.body.rainfall_rate,
+          flood_depth: req.body.flood_depth,
+          userID: decoded.id,
+        })
+          .then((_report) => res.status(201).send(_report))
+          .catch((err) => res.status(400).send(err));
+      } else {
+        var file = req.files.uploaded_image;
+        var img_name = file.name;
+        file.mv("public/images/upload_images/" + file.name, function (err) {
+          if (err) {
+            return res.status(500).send(err);
+          } else {
+            const report = Report.create({
+              latitude: req.body.latitude,
+              longitude: req.body.longitude,
+              rainfall_rate: req.body.rainfall_rate,
+              flood_depth: req.body.flood_depth,
+              userID: decoded.id,
+              image: image_name,
+            })
+              .then((_report) => res.status(201).send(_report))
+              .catch((err) => res.status(400).send(err));
+          }
+        });
+      }
     }
   });
 };
@@ -129,15 +150,6 @@ exports.deleteVote = async (req, res) => {
           });
         });
       });
-      // const report = Report.create({
-      //   latitude: req.body.latitude,
-      //   longitude: req.body.longitude,
-      //   rainfall_rate: req.body.rainfall_rate,
-      //   flood_depth: req.body.flood_depth,
-      //   user: req.body.user,
-      // })
-      //   .then((_report) => res.status(201).send(_report))
-      //   .catch((err) => res.status(400).send(err));
     }
   });
 };
@@ -161,18 +173,13 @@ exports.findByID = async (req, res) => {
           message: err.message,
         });
       } else {
-        // console.log(decoded.id);
-        // const decoded = JSON.dec
-        // console.log(jwt.decode(req.body.token, { complete: true }));
         Report.findOne({ where: { id: req.params.id } }).then((report) => {
-          // console.log(report);
           Vote.count({
             where: {
               reportID: req.params.id,
               action: "upvote",
             },
           }).then((upvote) => {
-            // console.log(upvote);
             Vote.count({
               where: {
                 reportID: req.params.id,
@@ -190,6 +197,7 @@ exports.findByID = async (req, res) => {
                   flood_depth: report.flood_depth,
                   createdAt: report.createdAt,
                   userID: report.userID,
+                  image: report.image,
                   upvote: upvote,
                   downvote: downvote,
                   currentAction: currentAction.action,
@@ -197,20 +205,17 @@ exports.findByID = async (req, res) => {
               });
             });
           });
-          // res.status(200).json(report);
         });
       }
     });
   } else {
     Report.findOne({ where: { id: req.params.id } }).then((report) => {
-      // console.log(report);
       Vote.count({
         where: {
           reportID: req.params.id,
           action: "upvote",
         },
       }).then((upvote) => {
-        // console.log(upvote);
         Vote.count({
           where: {
             reportID: req.params.id,
@@ -230,7 +235,6 @@ exports.findByID = async (req, res) => {
           });
         });
       });
-      // res.status(200).json(report);
     });
   }
 };
@@ -243,12 +247,3 @@ exports.findByUserID = async (req, res) => {
     res.status(200).json(report);
   });
 };
-
-// exports.findByUsername = async (req, res) => {
-//   Report.findAll({ where: { username: req.params.username } }).then(function (
-//     report
-//   ) {
-//     console.log(report);
-//     res.status(200).json(report);
-//   });
-// };

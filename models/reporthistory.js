@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       flood_depth: DataTypes.DOUBLE,
       upvote: DataTypes.JSON,
       downvote: DataTypes.JSON,
+      image: DataTypes.STRING,
     },
     {
       sequelize,

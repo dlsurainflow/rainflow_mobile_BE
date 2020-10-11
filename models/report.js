@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       longitude: DataTypes.DOUBLE,
       rainfall_rate: DataTypes.DOUBLE,
       flood_depth: DataTypes.DOUBLE,
+      image: DataTypes.STRING,
     },
     {
       sequelize,
