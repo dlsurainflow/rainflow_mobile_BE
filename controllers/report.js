@@ -179,6 +179,12 @@ exports.findByID = async (req, res) => {
               Vote.findOne({
                 where: { reportID: req.params.id, userID: decoded.id },
               }).then((currentAction) => {
+                var _currentAction;
+                if (currentAction === null) {
+                  _currentAction = null;
+                } else {
+                  _currentAction = currentAction.action;
+                }
                 res.status(200).json({
                   id: report.id,
                   latitude: report.latitude,
@@ -190,7 +196,7 @@ exports.findByID = async (req, res) => {
                   image: report.image,
                   upvote: upvote,
                   downvote: downvote,
-                  currentAction: currentAction.action,
+                  currentAction: _currentAction,
                 });
               });
             });
