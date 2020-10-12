@@ -156,7 +156,7 @@ exports.findByID = async (req, res) => {
   var token = req.header("Authorization");
   var tokenArray = token.split(" ");
   if (tokenArray[1] && req.body.token !== "") {
-    jwt.verify([1], config.secret, function (err, decoded) {
+    jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
       if (err) {
         res.status(400).send({
           status: "Error",
