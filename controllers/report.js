@@ -5,16 +5,23 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
+const fs = require("fs");
 
-// Create and Save a new Tutorial
 exports.submitReport = async (req, res) => {
+  console.log(req);
+  var token = req.header("Authorization");
+  console.log(token);
+  var tokenArray = token.split(" ");
+  console.log(tokenArray[1]);
+  console.log("Body: " + req.body);
+
   if (!req.body)
     return res.status(400).send({
       status: "Error",
       message: "No paramaters passed",
     });
 
-  if (!req.body.token || req.body.token === "")
+  if (!req.header("Authorization") || req.header("Authorization") === "")
     return res.status(400).send({
       status: "Error",
       message: "No authentication token provided.",
@@ -31,7 +38,7 @@ exports.submitReport = async (req, res) => {
       message: "Missing paramaters",
     });
 
-  jwt.verify(req.body.token, config.secret, function (err, decoded) {
+  jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
     if (err) {
       res.status(400).send({
         status: "Error",
@@ -51,7 +58,7 @@ exports.submitReport = async (req, res) => {
       } else {
         var file = req.files.uploaded_image;
         var img_name = file.name;
-        file.mv("public/images/upload_images/" + file.name, function (err) {
+        file.mv("./public/images/upload_images/" + file.name, function (err) {
           if (err) {
             return res.status(500).send(err);
           } else {
@@ -73,15 +80,16 @@ exports.submitReport = async (req, res) => {
 };
 
 exports.voteReport = async (req, res) => {
-  console.log(req.body);
-  jwt.verify(req.body.token, config.secret, function (err, decoded) {
+  var token = req.header("Authorization");
+  var tokenArray = token.split(" ");
+  jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
     if (err) {
       res.status(400).send({
         status: "Error",
         message: err.message,
       });
     } else {
-      const vote = Vote.findOne({
+      Vote.findOne({
         where: { userID: decoded.id, reportID: req.body.reportID },
       }).then((_voteExists) => {
         console.log("Vote exists: " + _voteExists);
@@ -110,33 +118,13 @@ exports.voteReport = async (req, res) => {
   });
 };
 
-async function voteExists(userID, reportID) {
-  return Vote.count({ where: { userID: userID, reportID: reportID } }).then(
-    (count) => {
-      // console.log(count);
-      if (count == 0) {
-        return false;
-      }
-      return true;
-    }
-  );
-}
-
-async function reportExists(reportID) {
-  return Report.count({ where: { id: reportID } }).then((count) => {
-    // console.log(count);
-    if (count == 0) {
-      return false;
-    }
-    return true;
-  });
-}
-
 exports.deleteVote = async (req, res) => {
-  console.log(req.body);
-  jwt.verify(req.body.token, config.secret, function (err, decoded) {
+  var token = req.header("Authorization");
+  var tokenArray = token.split(" ");
+  // console.log(req.body);
+  jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
     if (err) {
-      res.status(400).send({
+      res.status(401).send({
         status: "Error",
         message: err.message,
       });
@@ -165,8 +153,10 @@ exports.returnAll = async (req, res) => {
 };
 
 exports.findByID = async (req, res) => {
-  if (req.body.token && req.body.token !== "") {
-    jwt.verify(req.body.token, config.secret, function (err, decoded) {
+  var token = req.header("Authorization");
+  var tokenArray = token.split(" ");
+  if (tokenArray[1] && req.body.token !== "") {
+    jwt.verify([1], config.secret, function (err, decoded) {
       if (err) {
         res.status(400).send({
           status: "Error",
@@ -245,5 +235,41 @@ exports.findByUserID = async (req, res) => {
   ) {
     console.log(report);
     res.status(200).json(report);
+  });
+};
+
+exports.deleteReportByID = async (req, res) => {
+  var token = req.header("Authorization");
+  var tokenArray = token.split(" ");
+  jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
+    if (err) {
+      res.status(401).send({
+        status: "Error",
+        message: err.message,
+      });
+    } else {
+      Report.findOne({ where: { id: req.params.id } }).then((_report) => {
+        if (_report === null) {
+          res.status(400).send({
+            status: "Error",
+            message: "Report does not exist",
+          });
+        } else {
+          if (_report.image !== null) {
+            try {
+              fs.unlinkSync(`./public/uploads/reports/${_report.image}`);
+              console.log("Removed " + _report.image);
+            } catch (e) {
+              console.error(e);
+            }
+          }
+          Report.destroy({ where: { id: _report.id } }).then((response) => {
+            res.status(200).json({
+              status: "Success",
+            });
+          });
+        }
+      });
+    }
   });
 };
