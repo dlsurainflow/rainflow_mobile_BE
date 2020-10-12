@@ -6,6 +6,7 @@ var bodyParser = require("body-parser");
 var logger = require("morgan");
 var cors = require("cors");
 var multer = require("multer");
+var path = require("path");
 var corsOptions = {
   origin: "http://rainflow.live/api",
 };
@@ -49,7 +50,8 @@ app.use("/map", mapRouter);
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./public/uploads/reports/");
+    // path.join(__dirname,'../upload'))
+    cb(null, path.join(__dirname, "./public/uploads/reports/"));
   },
   filename: function (req, file, cb) {
     var datetimestamp = Date.now();
