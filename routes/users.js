@@ -12,5 +12,8 @@ router.get("/", function (req, res, next) {
 // router.post("/authenticate", userController.authenticate);
 
 router.post("/login", userController.authenticate);
+router.post("/forgot-password", userController.forgotPassword);
+router.post("/reset-password", userController.resetPassword);
+router.post("/change-password", userController.changePassword);
 
 module.exports = router;
