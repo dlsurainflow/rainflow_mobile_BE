@@ -26,6 +26,9 @@ const transport = nodemailer.createTransport({
     user: "no-reply",
     pass: "dlsurainflow1234",
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 // const transport = nodemailer.createTransport({
