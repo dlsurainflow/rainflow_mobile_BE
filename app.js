@@ -95,6 +95,7 @@ const authentication = function (req, res, next) {
 };
 
 app.post("/report/submit", authentication, upload, function (req, res) {
+  console.log(req);
   var token = req.header("Authorization");
   var tokenArray = token.split(" ");
   var decoded = jwt.verify(tokenArray[1], config.secret);
