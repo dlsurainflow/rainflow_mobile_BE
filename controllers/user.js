@@ -19,14 +19,24 @@ const pool = new Pool({
 });
 
 const transport = nodemailer.createTransport({
-  host: "smtp-relay.sendinblue.com",
-  port: 587,
+  host: "localhost",
+  port: 25,
   secure: false,
   auth: {
-    user: "ivan_garan@dlsu.edu.ph",
-    pass: "I3G5wdFpqL7D4ScE",
+    user: "no-reply",
+    pass: "dlsurainflow1234",
   },
 });
+
+// const transport = nodemailer.createTransport({
+//   host: "smtp.rainflow.live",
+//   port: 587,
+//   secure: false,
+//   auth: {
+//     user: "ivan_garan@dlsu.edu.ph",
+//     pass: "I3G5wdFpqL7D4ScE",
+//   },
+// });
 
 exports.create = (req, res) => {};
 
