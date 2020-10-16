@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       altitude: DataTypes.FLOAT,
       flood_depth: DataTypes.FLOAT,
       rainfall_amount: DataTypes.FLOAT,
+      rainfall_rate: DataTypes.FLOAT,
       temperature: DataTypes.FLOAT,
       pressure: DataTypes.FLOAT,
       humidity: DataTypes.FLOAT,
