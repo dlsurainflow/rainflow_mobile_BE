@@ -81,14 +81,17 @@ exports.forgotPassword = async (req, res) => {
   });
 
   //create email
+  var uri = encodeURI(fpSalt);
   const message = {
     from: "no-reply@rainflow.live",
     to: req.body.email,
     // replyTo: process.env.REPLYTO_ADDRESS,
     subject: "RainFLOW Network: Forgot Password",
     text:
-      "To reset your password, please click the link below.\n\nhttps://rainflow.live/reset-password" +
-      "\n\n Enter your email address and the token below.\n" +
+      "To reset your password, please click the link below:\n" +
+      `https://rainflow.live/reset-password/${uri}/${req.body.email}` +
+      "\n\n" +
+      "If the link doesn't work, please go to https://rainflow.live/reset-password/ and enter this token below: \n" +
       "Token: " +
       fpSalt,
   };
@@ -168,6 +171,22 @@ exports.resetPassword = async (req, res) => {
           }
         }
       );
+      const message = {
+        from: "no-reply@rainflow.live",
+        to: req.body.email,
+        subject: "RainFLOW Network: Password Reset Succesful!",
+        text: "This is to confirm you have succesffully reset your password!",
+      };
+
+      //send email
+      transport.sendMail(message, function (err, info) {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(info);
+        }
+      });
+
       return res.json({
         status: "Success",
         message: "Password reset. Please login with your new password.",
@@ -177,6 +196,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.changePassword = async (req, res) => {
+  console.log(req);
   var token = req.header("Authorization");
   var tokenArray = token.split(" ");
   jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
@@ -271,6 +291,8 @@ exports.authenticate = async (req, res) => {
               email: user.email,
               tenantID: user.tenantID,
               points: user.points,
+              createdAt: user.createdAt,
+              badge: null,
               token: token,
             },
           });
