@@ -236,12 +236,19 @@ exports.findByID = async (req, res) => {
 };
 
 exports.findByUserID = async (req, res) => {
-  Report.findAll({ where: { userID: req.params.userID } }).then(function (
-    report
-  ) {
-    console.log(report);
-    res.status(200).json(report);
+  // Report.findAll({ where: { userID: req.params.userID } }).then(function (
+  //   report
+  // ) {
+  //   console.log(report);
+  //   res.status(200).json(report);
+  // });
+
+  const active = await Report.findAll({ where: { userID: req.params.userID } });
+  const archive = await ReportHistory.findAll({
+    where: { userID: req.params.userID },
   });
+
+  res.status(200).json({ active: active, archive: archive });
 };
 
 exports.deleteReportByID = async (req, res) => {
