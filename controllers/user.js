@@ -67,7 +67,7 @@ exports.forgotPassword = async (req, res) => {
   var expireDate = new Date();
   expireDate.setDate(expireDate.getDate() + 1 / 24);
 
-  console.log("Expire Date: " + expireDate);
+  // console.log("Expire Date: " + expireDate);
   // const token = jwt.sign({ email: req.body.email }, fpSalt, {
   //   expiresIn: "1h",
   // });
@@ -81,7 +81,7 @@ exports.forgotPassword = async (req, res) => {
   });
 
   //create email
-  var uri = encodeURI(fpSalt);
+  var uri = encodeURIComponent(fpSalt);
   const message = {
     from: "no-reply@rainflow.live",
     to: req.body.email,
@@ -196,7 +196,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.changePassword = async (req, res) => {
-  console.log(req);
+  // console.log(req);
   var token = req.header("Authorization");
   var tokenArray = token.split(" ");
   jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
