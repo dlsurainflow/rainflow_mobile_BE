@@ -246,6 +246,21 @@ exports.changePassword = async (req, res) => {
               }
             );
 
+            const message = {
+              from: "no-reply@rainflow.live",
+              to: req.body.email,
+              subject: "RainFLOW Network: Password Changed!",
+              text: "Your password has been changed.",
+            };
+
+            //send email
+            transport.sendMail(message, function (err, info) {
+              if (err) {
+                console.error(err);
+              } else {
+                console.log(info);
+              }
+            });
             return res.json({
               status: "Success",
               message:
