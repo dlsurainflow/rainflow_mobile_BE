@@ -81,7 +81,7 @@ exports.forgotPassword = async (req, res) => {
   });
 
   //create email
-  var uri = encodeURI(fpSalt);
+  var uri = encodeURIComponent(fpSalt);
   const message = {
     from: "no-reply@rainflow.live",
     to: req.body.email,
