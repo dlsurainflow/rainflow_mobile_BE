@@ -201,7 +201,7 @@ exports.changePassword = async (req, res) => {
   var tokenArray = token.split(" ");
   jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
     if (err) {
-      res.status(400).send({
+      res.status(401).send({
         status: "Error",
         message: err.message,
       });
@@ -254,7 +254,7 @@ exports.changePassword = async (req, res) => {
           }
         });
       } else {
-        return res.json({
+        return res.status(400).json({
           status: "Error",
           message: "Current password is incorrect.",
         });
