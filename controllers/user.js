@@ -248,7 +248,7 @@ exports.changePassword = async (req, res) => {
 
             const message = {
               from: "no-reply@rainflow.live",
-              to: req.body.email,
+              to: user.email,
               subject: "RainFLOW Network: Password Changed!",
               text: "Your password has been changed.",
             };
