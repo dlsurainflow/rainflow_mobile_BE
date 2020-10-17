@@ -156,52 +156,87 @@ exports.findByID = async (req, res) => {
   if (req.header("Authorization") && req.header("Authorization") !== "") {
     var token = req.header("Authorization");
     var tokenArray = token.split(" ");
-    jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
+    jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
       if (err) {
         res.status(400).send({
           status: "Error",
           message: err.message,
         });
       } else {
-        Report.findOne({ where: { id: req.params.id } }).then((report) => {
-          Vote.count({
-            where: {
-              reportID: req.params.id,
-              action: "upvote",
-            },
-          }).then((upvote) => {
-            Vote.count({
-              where: {
-                reportID: req.params.id,
-                action: "downvote",
-              },
-            }).then((downvote) => {
-              Vote.findOne({
-                where: { reportID: req.params.id, userID: decoded.id },
-              }).then((currentAction) => {
-                var _currentAction;
-                if (currentAction === null) {
-                  _currentAction = null;
-                } else {
-                  _currentAction = currentAction.action;
-                }
-                res.status(200).json({
-                  id: report.id,
-                  latitude: report.latitude,
-                  longitude: report.longitude,
-                  rainfall_rate: report.rainfall_rate,
-                  flood_depth: report.flood_depth,
-                  createdAt: report.createdAt,
-                  userID: report.userID,
-                  image: report.image,
-                  upvote: upvote,
-                  downvote: downvote,
-                  currentAction: _currentAction,
-                });
-              });
-            });
-          });
+        var report = await Report.findOne({ where: { id: req.params.id } });
+        var upvote = await Vote.count({
+          where: {
+            reportID: req.params.id,
+            action: "upvote",
+          },
         });
+        var downvote = await Vote.count({
+          where: {
+            reportID: req.params.id,
+            action: "downvote",
+          },
+        });
+        var _currentAction;
+        await Vote.findOne({
+          where: { reportID: req.params.id, userID: decoded.id },
+        }).then((res) => {
+          if (res === null) {
+            _currentAction = null;
+          } else _currentAction = res.action;
+        });
+
+        res.json(200).json({
+          id: report.id,
+          latitude: report.latitude,
+          longitude: report.longitude,
+          rainfall_rate: report.rainfall_rate,
+          flood_depth: report.flood_depth,
+          createdAt: report.createdAt,
+          userID: report.userID,
+          image: report.image,
+          upvote: upvote,
+          downvote: downvote,
+          currentAction: _currentAction,
+        });
+        // Report.findOne({ where: { id: req.params.id } }).then((report) => {
+        //   Vote.count({
+        //     where: {
+        //       reportID: req.params.id,
+        //       action: "upvote",
+        //     },
+        //   }).then((upvote) => {
+        //     Vote.count({
+        //       where: {
+        //         reportID: req.params.id,
+        //         action: "downvote",
+        //       },
+        //     }).then((downvote) => {
+        //       Vote.findOne({
+        //         where: { reportID: req.params.id, userID: decoded.id },
+        //       }).then((currentAction) => {
+        //         var _currentAction;
+        //         if (currentAction === null) {
+        //           _currentAction = null;
+        //         } else {
+        //           _currentAction = currentAction.action;
+        //         }
+        //         res.status(200).json({
+        //           id: report.id,
+        //           latitude: report.latitude,
+        //           longitude: report.longitude,
+        //           rainfall_rate: report.rainfall_rate,
+        //           flood_depth: report.flood_depth,
+        //           createdAt: report.createdAt,
+        //           userID: report.userID,
+        //           image: report.image,
+        //           upvote: upvote,
+        //           downvote: downvote,
+        //           currentAction: _currentAction,
+        //         });
+        //       });
+        //     });
+        //   });
+        // });
       }
     });
   } else {
