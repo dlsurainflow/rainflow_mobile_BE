@@ -283,6 +283,13 @@ exports.authenticate = async (req, res) => {
           const token = jwt.sign({ id: user.id }, config.secret, {
             expiresIn: "3d",
           });
+          var badgeImg;
+          if (user.points < 25) badgeImg = "0.png";
+          else if (user.points >= 25 && user.points < 50) badgeImg = "1.png";
+          else if (user.points >= 50 && user.points < 75) badgeImg = "2.png";
+          else if (user.points >= 75 && user.points < 100) badgeImg = "3.png";
+          else badgeImg = null;
+
           res.json({
             status: "Success",
             data: {
@@ -292,7 +299,7 @@ exports.authenticate = async (req, res) => {
               tenantID: user.tenantID,
               points: user.points,
               createdAt: user.createdAt,
-              badge: null,
+              badge: badgeImg,
               token: token,
             },
           });

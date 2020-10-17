@@ -7,77 +7,77 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
 const fs = require("fs");
 
-exports.submitReport = async (req, res) => {
-  console.log(req);
-  var token = req.header("Authorization");
-  console.log(token);
-  var tokenArray = token.split(" ");
-  console.log(tokenArray[1]);
-  console.log("Body: " + req.body);
+// exports.submitReport = async (req, res) => {
+//   console.log(req);
+//   var token = req.header("Authorization");
+//   console.log(token);
+//   var tokenArray = token.split(" ");
+//   console.log(tokenArray[1]);
+//   console.log("Body: " + req.body);
 
-  if (!req.body)
-    return res.status(400).send({
-      status: "Error",
-      message: "No paramaters passed",
-    });
+//   if (!req.body)
+//     return res.status(400).send({
+//       status: "Error",
+//       message: "No paramaters passed",
+//     });
 
-  if (!req.header("Authorization") || req.header("Authorization") === "")
-    return res.status(400).send({
-      status: "Error",
-      message: "No authentication token provided.",
-    });
+//   if (!req.header("Authorization") || req.header("Authorization") === "")
+//     return res.status(400).send({
+//       status: "Error",
+//       message: "No authentication token provided.",
+//     });
 
-  if (
-    !req.body.latitude ||
-    !req.body.longitude ||
-    !req.body.flood_depth ||
-    !req.body.rainfall_rate
-  )
-    return res.status(400).send({
-      status: "Error",
-      message: "Missing paramaters",
-    });
+//   if (
+//     !req.body.latitude ||
+//     !req.body.longitude ||
+//     !req.body.flood_depth ||
+//     !req.body.rainfall_rate
+//   )
+//     return res.status(400).send({
+//       status: "Error",
+//       message: "Missing paramaters",
+//     });
 
-  jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
-    if (err) {
-      res.status(400).send({
-        status: "Error",
-        message: err.message,
-      });
-    } else {
-      if (!req.files) {
-        const report = Report.create({
-          latitude: req.body.latitude,
-          longitude: req.body.longitude,
-          rainfall_rate: req.body.rainfall_rate,
-          flood_depth: req.body.flood_depth,
-          userID: decoded.id,
-        })
-          .then((_report) => res.status(201).send(_report))
-          .catch((err) => res.status(400).send(err));
-      } else {
-        var file = req.files.uploaded_image;
-        var img_name = file.name;
-        file.mv("./public/images/upload_images/" + file.name, function (err) {
-          if (err) {
-            return res.status(500).send(err);
-          } else {
-            const report = Report.create({
-              latitude: req.body.latitude,
-              longitude: req.body.longitude,
-              rainfall_rate: req.body.rainfall_rate,
-              flood_depth: req.body.flood_depth,
-              userID: decoded.id,
-              image: image_name,
-            })
-              .then((_report) => res.status(201).send(_report))
-              .catch((err) => res.status(400).send(err));
-          }
-        });
-      }
-    }
-  });
-};
+//   jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
+//     if (err) {
+//       res.status(400).send({
+//         status: "Error",
+//         message: err.message,
+//       });
+//     } else {
+//       if (!req.files) {
+//         const report = Report.create({
+//           latitude: req.body.latitude,
+//           longitude: req.body.longitude,
+//           rainfall_rate: req.body.rainfall_rate,
+//           flood_depth: req.body.flood_depth,
+//           userID: decoded.id,
+//         })
+//           .then((_report) => res.status(201).send(_report))
+//           .catch((err) => res.status(400).send(err));
+//       } else {
+//         var file = req.files.uploaded_image;
+//         var img_name = file.name;
+//         file.mv("./public/images/upload_images/" + file.name, function (err) {
+//           if (err) {
+//             return res.status(500).send(err);
+//           } else {
+//             const report = Report.create({
+//               latitude: req.body.latitude,
+//               longitude: req.body.longitude,
+//               rainfall_rate: req.body.rainfall_rate,
+//               flood_depth: req.body.flood_depth,
+//               userID: decoded.id,
+//               image: image_name,
+//             })
+//               .then((_report) => res.status(201).send(_report))
+//               .catch((err) => res.status(400).send(err));
+//           }
+//         });
+//       }
+//     }
+//   });
+// };
 
 exports.voteReport = async (req, res) => {
   var token = req.header("Authorization");
