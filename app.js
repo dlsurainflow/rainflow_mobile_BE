@@ -95,7 +95,7 @@ const authentication = function (req, res, next) {
 };
 
 app.post("/report/submit", authentication, upload, function (req, res) {
-  console.log(req);
+  // console.log(req);
   var token = req.header("Authorization");
   var tokenArray = token.split(" ");
   var decoded = jwt.verify(tokenArray[1], config.secret);
@@ -112,16 +112,32 @@ app.post("/report/submit", authentication, upload, function (req, res) {
     });
 
   if (!req.file) {
+    let point = {
+      type: "Point",
+      coordinates: [req.body.longitude, req.body.latitude],
+      crs: { type: "name", properties: { name: "EPSG:4326" } },
+    };
+
     const report = Report.create({
       latitude: req.body.latitude,
       longitude: req.body.longitude,
       rainfall_rate: req.body.rainfall_rate,
       flood_depth: req.body.flood_depth,
       userID: decoded.id,
+      position: point,
     })
       .then((_report) => res.status(201).send(_report))
-      .catch((err) => res.status(400).send(err));
+      .catch((err) => {
+        console.error(err);
+        res.status(400).send(err);
+      });
   } else {
+    let point = {
+      type: "Point",
+      coordinates: [req.body.longitude, req.body.latitude],
+      crs: { type: "name", properties: { name: "EPSG:4326" } },
+    };
+
     const report = Report.create({
       latitude: req.body.latitude,
       longitude: req.body.longitude,
@@ -129,9 +145,13 @@ app.post("/report/submit", authentication, upload, function (req, res) {
       flood_depth: req.body.flood_depth,
       userID: decoded.id,
       image: req.file.filename,
+      position: point,
     })
       .then((_report) => res.status(201).send(_report))
-      .catch((err) => res.status(400).send(err));
+      .catch((err) => {
+        console.error(err);
+        res.status(400).send(err);
+      });
   }
 });
 

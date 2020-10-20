@@ -3,11 +3,11 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     return Promise.all([
-      queryInterface.addColumn("RAFTs", "postion", {
+      queryInterface.addColumn("RAFTs", "position", {
         type: Sequelize.GEOMETRY("POINT", 4326),
         allowNull: true,
       }),
-      queryInterface.addColumn("Reports", "postion", {
+      queryInterface.addColumn("Reports", "position", {
         type: Sequelize.GEOMETRY("POINT", 4326),
         allowNull: true,
       }),

@@ -14,5 +14,6 @@ router.get("/", function (req, res, next) {
 // router.post("/login", userController.authenticate);
 
 router.get("/all", mapController.returnAll);
+router.get("/push", mapController.pushNotification);
 
 module.exports = router;
