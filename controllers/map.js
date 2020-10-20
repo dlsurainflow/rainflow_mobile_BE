@@ -23,3 +23,43 @@ exports.returnAll = async (req, res) => {
     });
   });
 };
+
+exports.pushNotification = async (req, res) => {
+  Report.findAll({
+    where: Sequelize.where(
+      Sequelize.fn(
+        "ST_DWithin",
+        Sequelize.col("position"),
+        Sequelize.fn(
+          "ST_SetSRID",
+          Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
+          4326
+        ),
+        0.032
+      ),
+      true
+    ),
+  })
+    .then((report) => {
+      RAFT.findAll({
+        where: Sequelize.where(
+          Sequelize.fn(
+            "ST_DWithin",
+            Sequelize.col("position"),
+            Sequelize.fn(
+              "ST_SetSRID",
+              Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
+              4326
+            ),
+            0.032
+          ),
+          true
+        ),
+      })
+        .then((raft) => {
+          res.status(200).json({ mobile: report, raft: raft });
+        })
+        .catch((err) => console.err(err));
+    })
+    .catch((err) => console.err(err));
+};

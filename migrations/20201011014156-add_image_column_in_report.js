@@ -15,7 +15,7 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    return Promose.all([
+    return Promise.all([
       queryInterface.removeColumn("Reports", "image"),
       queryInterface.removeColumn("ReportHistories", "image"),
     ]);
