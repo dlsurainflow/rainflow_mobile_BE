@@ -1,0 +1,23 @@
+"use strict";
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    return Promise.all([
+      queryInterface.addColumn("RAFTs", "postion", {
+        type: Sequelize.GEOMETRY("POINT", 4326),
+        allowNull: true,
+      }),
+      queryInterface.addColumn("Reports", "postion", {
+        type: Sequelize.GEOMETRY("POINT", 4326),
+        allowNull: true,
+      }),
+    ]);
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    return Promise.all(
+      [queryInterface.removeColumn("RAFTs", "position")],
+      [queryInterface.removeColumn("Reports", "position")]
+    );
+  },
+};
