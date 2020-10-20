@@ -25,7 +25,7 @@ exports.returnAll = async (req, res) => {
 };
 
 exports.pushNotification = async (req, res) => {
-  await Report.findAll({
+  Report.findAll({
     where: Sequelize.where(
       Sequelize.fn(
         "ST_DWithin",
@@ -39,8 +39,27 @@ exports.pushNotification = async (req, res) => {
       ),
       true
     ),
-  }).then((_res) => {
-    console.log("Response: " + JSON.stringify(_res));
-    res.status(200).json(_res);
-  });
+  })
+    .then((report) => {
+      RAFT.findAll({
+        where: Sequelize.where(
+          Sequelize.fn(
+            "ST_DWithin",
+            Sequelize.col("position"),
+            Sequelize.fn(
+              "ST_SetSRID",
+              Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
+              4326
+            ),
+            0.032
+          ),
+          true
+        ),
+      })
+        .then((raft) => {
+          res.status(200).json({ mobile: report, raft: raft });
+        })
+        .catch((err) => console.err(err));
+    })
+    .catch((err) => console.err(err));
 };
