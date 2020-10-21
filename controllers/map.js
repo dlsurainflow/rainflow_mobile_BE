@@ -14,8 +14,6 @@ exports.returnAll = async (req, res) => {
     RAFT.findAll({
       raw: true,
     }).then(function (raft) {
-      // console.log(report);
-      // console.log(raft);
       res.status(200).json({
         mobile: report,
         raft: raft,

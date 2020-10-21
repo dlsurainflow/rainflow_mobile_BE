@@ -24,6 +24,7 @@ router.get("/all", reportController.returnAll);
 router.get("/user/:userID", reportController.findByUserID);
 router.get("/:id", reportController.findByID);
 router.delete("/:id", reportController.deleteReportByID);
+router.get("/history/:id", reportController.findByIDHistory);
 router.post("/vote", reportController.voteReport);
 router.delete("/vote", reportController.deleteVote);
 
