@@ -7,78 +7,6 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
 const fs = require("fs");
 
-// exports.submitReport = async (req, res) => {
-//   console.log(req);
-//   var token = req.header("Authorization");
-//   console.log(token);
-//   var tokenArray = token.split(" ");
-//   console.log(tokenArray[1]);
-//   console.log("Body: " + req.body);
-
-//   if (!req.body)
-//     return res.status(400).send({
-//       status: "Error",
-//       message: "No paramaters passed",
-//     });
-
-//   if (!req.header("Authorization") || req.header("Authorization") === "")
-//     return res.status(400).send({
-//       status: "Error",
-//       message: "No authentication token provided.",
-//     });
-
-//   if (
-//     !req.body.latitude ||
-//     !req.body.longitude ||
-//     !req.body.flood_depth ||
-//     !req.body.rainfall_rate
-//   )
-//     return res.status(400).send({
-//       status: "Error",
-//       message: "Missing paramaters",
-//     });
-
-//   jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
-//     if (err) {
-//       res.status(400).send({
-//         status: "Error",
-//         message: err.message,
-//       });
-//     } else {
-//       if (!req.files) {
-//         const report = Report.create({
-//           latitude: req.body.latitude,
-//           longitude: req.body.longitude,
-//           rainfall_rate: req.body.rainfall_rate,
-//           flood_depth: req.body.flood_depth,
-//           userID: decoded.id,
-//         })
-//           .then((_report) => res.status(201).send(_report))
-//           .catch((err) => res.status(400).send(err));
-//       } else {
-//         var file = req.files.uploaded_image;
-//         var img_name = file.name;
-//         file.mv("./public/images/upload_images/" + file.name, function (err) {
-//           if (err) {
-//             return res.status(500).send(err);
-//           } else {
-//             const report = Report.create({
-//               latitude: req.body.latitude,
-//               longitude: req.body.longitude,
-//               rainfall_rate: req.body.rainfall_rate,
-//               flood_depth: req.body.flood_depth,
-//               userID: decoded.id,
-//               image: image_name,
-//             })
-//               .then((_report) => res.status(201).send(_report))
-//               .catch((err) => res.status(400).send(err));
-//           }
-//         });
-//       }
-//     }
-//   });
-// };
-
 exports.voteReport = async (req, res) => {
   var token = req.header("Authorization");
   var tokenArray = token.split(" ");
@@ -198,45 +126,6 @@ exports.findByID = async (req, res) => {
           downvote: downvote,
           currentAction: _currentAction,
         });
-        // Report.findOne({ where: { id: req.params.id } }).then((report) => {
-        //   Vote.count({
-        //     where: {
-        //       reportID: req.params.id,
-        //       action: "upvote",
-        //     },
-        //   }).then((upvote) => {
-        //     Vote.count({
-        //       where: {
-        //         reportID: req.params.id,
-        //         action: "downvote",
-        //       },
-        //     }).then((downvote) => {
-        //       Vote.findOne({
-        //         where: { reportID: req.params.id, userID: decoded.id },
-        //       }).then((currentAction) => {
-        //         var _currentAction;
-        //         if (currentAction === null) {
-        //           _currentAction = null;
-        //         } else {
-        //           _currentAction = currentAction.action;
-        //         }
-        //         res.status(200).json({
-        //           id: report.id,
-        //           latitude: report.latitude,
-        //           longitude: report.longitude,
-        //           rainfall_rate: report.rainfall_rate,
-        //           flood_depth: report.flood_depth,
-        //           createdAt: report.createdAt,
-        //           userID: report.userID,
-        //           image: report.image,
-        //           upvote: upvote,
-        //           downvote: downvote,
-        //           currentAction: _currentAction,
-        //         });
-        //       });
-        //     });
-        //   });
-        // });
       }
     });
   } else {
@@ -270,14 +159,32 @@ exports.findByID = async (req, res) => {
   }
 };
 
-exports.findByUserID = async (req, res) => {
-  // Report.findAll({ where: { userID: req.params.userID } }).then(function (
-  //   report
-  // ) {
-  //   console.log(report);
-  //   res.status(200).json(report);
-  // });
+exports.findByIDHistory = async (req, res) => {
+  if (req.header("Authorization") === undefined) {
+    res.status(401).send({
+      status: "Error",
+      message: "Authorization token not provided.",
+    });
+  } else {
+    var token = req.header("Authorization");
+    var tokenArray = token.split(" ");
+    jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
+      if (err) {
+        res.status(401).send({
+          status: "Error",
+          message: err.message,
+        });
+      } else {
+        var report = await ReportHistory.findOne({
+          where: { id: req.params.id },
+        });
+        res.status(200).json(report);
+      }
+    });
+  }
+};
 
+exports.findByUserID = async (req, res) => {
   const active = await Report.findAll({ where: { userID: req.params.userID } });
   const archive = await ReportHistory.findAll({
     where: { userID: req.params.userID },
