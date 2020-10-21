@@ -113,7 +113,7 @@ exports.findByID = async (req, res) => {
           } else _currentAction = res.action;
         });
 
-        res.json(200).json({
+        res.status(200).json({
           id: report.id,
           latitude: report.latitude,
           longitude: report.longitude,
