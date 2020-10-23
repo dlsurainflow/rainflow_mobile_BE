@@ -129,32 +129,31 @@ exports.findByID = async (req, res) => {
       }
     });
   } else {
-    Report.findOne({ where: { id: req.params.id } }).then((report) => {
-      Vote.count({
-        where: {
-          reportID: req.params.id,
-          action: "upvote",
-        },
-      }).then((upvote) => {
-        Vote.count({
-          where: {
-            reportID: req.params.id,
-            action: "downvote",
-          },
-        }).then((downvote) => {
-          res.status(200).json({
-            id: report.id,
-            latitude: report.latitude,
-            longitude: report.longitude,
-            rainfall_rate: report.rainfall_rate,
-            flood_depth: report.flood_depth,
-            createdAt: report.createdAt,
-            userID: report.userID,
-            upvote: upvote,
-            downvote: downvote,
-          });
-        });
-      });
+    var report = await Report.findOne({ where: { id: req.params.id } });
+    var upvote = await Vote.count({
+      where: {
+        reportID: req.params.id,
+        action: "upvote",
+      },
+    });
+    var downvote = await Vote.count({
+      where: {
+        reportID: req.params.id,
+        action: "downvote",
+      },
+    });
+
+    res.status(200).json({
+      id: report.id,
+      latitude: report.latitude,
+      longitude: report.longitude,
+      rainfall_rate: report.rainfall_rate,
+      flood_depth: report.flood_depth,
+      createdAt: report.createdAt,
+      userID: report.userID,
+      image: report.image,
+      upvote: upvote,
+      downvote: downvote,
     });
   }
 };

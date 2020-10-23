@@ -9,7 +9,12 @@ const config = require("../config/jwt.config.js");
 exports.returnAll = async (req, res) => {
   Report.findAll({
     raw: true,
-    include: [{ model: User, attributes: ["username"] }],
+    include: [
+      {
+        model: User,
+        attributes: [[Sequelize.literal('"User"."username"'), 'username']],
+      },
+    ],
   }).then(function (report) {
     RAFT.findAll({
       raw: true,
