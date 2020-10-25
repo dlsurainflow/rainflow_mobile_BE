@@ -122,6 +122,7 @@ exports.findByID = async (req, res) => {
           createdAt: report.createdAt,
           userID: report.userID,
           image: report.image,
+          description: report.description,
           upvote: upvote,
           downvote: downvote,
           currentAction: _currentAction,
@@ -152,6 +153,7 @@ exports.findByID = async (req, res) => {
       createdAt: report.createdAt,
       userID: report.userID,
       image: report.image,
+      description: report.description,
       upvote: upvote,
       downvote: downvote,
     });
