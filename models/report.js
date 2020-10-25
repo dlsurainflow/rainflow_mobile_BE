@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       flood_depth: DataTypes.DOUBLE,
       image: DataTypes.STRING,
       position: DataTypes.GEOMETRY("POINT", 4326),
+      description: DataTypes.STRING,
     },
     {
       sequelize,
