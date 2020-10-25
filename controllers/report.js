@@ -10,38 +10,39 @@ const fs = require("fs");
 exports.voteReport = async (req, res) => {
   var token = req.header("Authorization");
   var tokenArray = token.split(" ");
-  jwt.verify(tokenArray[1], config.secret, function (err, decoded) {
+  jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
     if (err) {
-      res.status(400).send({
+      res.status(401).send({
         status: "Error",
         message: err.message,
       });
     } else {
-      Vote.findOne({
+      var vote = await Vote.findOne({
         where: { userID: decoded.id, reportID: req.body.reportID },
-      }).then((_voteExists) => {
-        console.log("Vote exists: " + _voteExists);
-        if (_voteExists === null) {
-          console.log("is null");
-          Vote.upsert({
-            userID: req.body.userID,
-            reportID: req.body.reportID,
-            action: req.body.action,
-          })
-            .then((_report) => res.status(201).send(_report))
-            .catch((err) => res.status(400).send(err));
-        } else {
-          console.log("not null");
-          Vote.upsert({
-            id: _voteExists.id,
-            userID: decoded.id,
-            reportID: req.body.reportID,
-            action: req.body.action,
-          })
-            .then((_report) => res.status(201).send(_report))
-            .catch((err) => res.status(400).send(err));
-        }
       });
+
+      if (vote === null) {
+        Vote.create({
+          userID: req.body.userID,
+          reportID: req.body.reportID,
+          action: req.body.action,
+        })
+          .then((_report) => res.status(201).send(_report))
+          .catch((err) => res.status(400).send(err));
+      } else {
+        Vote.update(
+          {
+            action: req.body.action,
+          },
+          {
+            where: {
+              reportID: req.body.reportID,
+            },
+          }
+        )
+          .then((_report) => res.status(201).send(_report))
+          .catch((err) => res.status(400).send(err));
+      }
     }
   });
 };

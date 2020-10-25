@@ -1,10 +1,19 @@
-const { User, RAFT, Report } = require("../models");
+const { User, RAFT, Report, Vote } = require("../models");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
+const openGeocoder = require("node-open-geocoder");
+const NodeGeocoder = require("node-geocoder");
+
+const options = {
+  provider: "openstreetmap",
+  formatter: null, // 'gpx', 'string', ...
+};
+
+const geocoder = NodeGeocoder(options);
 
 exports.returnAll = async (req, res) => {
   Report.findAll({
@@ -21,6 +30,7 @@ exports.returnAll = async (req, res) => {
       "longitude",
       "rainfall_rate",
       "flood_depth",
+      "description",
       "createdAt",
       "updatedAt",
       "image",
@@ -81,3 +91,212 @@ exports.pushNotification = async (req, res) => {
     })
     .catch((err) => console.err(err));
 };
+
+exports.summary = async (req, res) => {
+  var _result = [];
+  var _isAuthenticated = false;
+  var token = req.header("Authorization");
+  // console.log(token);
+  if (token !== undefined) {
+    try {
+      var tokenArray = token.split(" ");
+      var decoded = jwt.verify(tokenArray[1], config.secret);
+      _isAuthenticated = true;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  var report = await Report.findAll({
+    where: {
+      [Op.or]: {
+        rainfall_rate: {
+          [Op.gt]: 10,
+        },
+        flood_depth: {
+          [Op.gt]: 2.5,
+        },
+      },
+    },
+    include: [
+      {
+        model: User,
+        attributes: ["username"],
+      },
+    ],
+    attributes: [
+      "id",
+      "latitude",
+      "longitude",
+      "rainfall_rate",
+      "flood_depth",
+      "createdAt",
+      "updatedAt",
+      "description",
+      "image",
+      "userID",
+      [Sequelize.literal('"User"."username"'), "username"],
+    ],
+  });
+  // console.log(report.length);
+  // console.log(report[0]);
+  for (var i = 0; i < report.length; i++) {
+    const res = await geocoder.reverse({
+      lat: report[i].latitude,
+      lon: report[i].longitude,
+    });
+    var upvote = await Vote.count({
+      where: {
+        reportID: report[i].id,
+        action: "upvote",
+      },
+    });
+    var downvote = await Vote.count({
+      where: {
+        reportID: report[i].id,
+        action: "downvote",
+      },
+    });
+
+    if (_isAuthenticated === true) {
+      var _currentAction;
+      await Vote.findOne({
+        where: { reportID: report[i].id, userID: decoded.id },
+      }).then((res) => {
+        if (res === null) {
+          _currentAction = null;
+        } else _currentAction = res.action;
+      });
+
+      report[i].dataValues.current_action = _currentAction;
+    }
+    // console.log(upvote);
+    report[i].dataValues.address = res[0].formattedAddress;
+    report[i].dataValues.upvote = upvote;
+    report[i].dataValues.downvote = downvote;
+    report[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
+      report[i].rainfall_rate
+    );
+    report[i].dataValues.flood_depth_title = getFloodDepthTitle(
+      report[i].flood_depth
+    );
+    report[i].dataValues.marker = getMarkerIcon(
+      report[i].rainfall_rate,
+      report[i].flood_depth
+    );
+  }
+  _result.push(report);
+
+  // console.log("raft");
+  var raft = await RAFT.findAll({
+    where: {
+      [Op.or]: {
+        rainfall_rate: {
+          [Op.gt]: 10,
+        },
+        flood_depth: {
+          [Op.gt]: 2.5,
+        },
+      },
+    },
+  });
+  for (var i = 0; i < raft.length; i++) {
+    const res = await geocoder.reverse({
+      lat: raft[i].latitude,
+      lon: raft[i].longitude,
+    });
+    // console.log(upvote);
+    raft[i].dataValues.address = res[0].formattedAddress;
+    raft[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
+      raft[i].rainfall_rate
+    );
+    raft[i].dataValues.flood_depth_title = getFloodDepthTitle(
+      raft[i].flood_depth
+    );
+    raft[i].dataValues.marker = getMarkerIcon(
+      raft[i].rainfall_rate,
+      raft[i].flood_depth
+    );
+  }
+  _result.push(raft);
+
+  res.status(200).json(_result);
+};
+
+function getRainfallRateTitle(rainfall_rate) {
+  if (rainfall_rate === 0) {
+    return "No Rain";
+  } else if (rainfall_rate > 0 && rainfall_rate < 2.5) {
+    return "Light Rain";
+  } else if (rainfall_rate >= 2.5 && rainfall_rate < 7.5) {
+    return "Moderate Rain";
+  } else if (rainfall_rate >= 7.5 && rainfall_rate < 15) {
+    return "Heavy Rain";
+  } else if (rainfall_rate >= 15 && rainfall_rate < 30) {
+    return "Intense Rain";
+  } else if (rainfall_rate >= 30) {
+    return "Torrential Rain";
+  }
+}
+
+function getFloodDepthTitle(flood_depth) {
+  if (flood_depth <= 10) {
+    return "No Flood";
+  } else if (flood_depth > 10 && flood_depth <= 25) {
+    return "Ankle Deep";
+  } else if (flood_depth > 25 && flood_depth <= 70) {
+    return "Knee Deep";
+  } else if (flood_depth > 70 && flood_depth <= 120) {
+    return "Waist Deep";
+  } else if (flood_depth > 120 && flood_depth <= 160) {
+    return "Neck Deep";
+  } else if (flood_depth > 160 && flood_depth <= 200) {
+    return "Top of Head Deep";
+  } else if (flood_depth > 200 && flood_depth <= 300) {
+    return "1-Storey High";
+  } else if (flood_depth > 300 && flood_depth <= 450) {
+    return "1.5-Storeys High";
+  } else if (flood_depth > 450) {
+    return "2-Storey or Higher";
+  }
+}
+
+function getMarkerIcon(rainfall_rate, flood_depth) {
+  var _return = "";
+
+  if (rainfall_rate === 0) {
+    _return += "A";
+  } else if (rainfall_rate > 0 && rainfall_rate < 2.5) {
+    _return += "B";
+  } else if (rainfall_rate >= 2.5 && rainfall_rate < 7.5) {
+    _return += "C";
+  } else if (rainfall_rate >= 7.5 && rainfall_rate < 15) {
+    _return += "D";
+  } else if (rainfall_rate >= 15 && rainfall_rate < 30) {
+    _return += "E";
+  } else if (rainfall_rate >= 30) {
+    _return += "F";
+  }
+
+  if (flood_depth <= 10) {
+    _return += "A";
+  } else if (flood_depth > 10 && flood_depth <= 25) {
+    _return += "B";
+  } else if (flood_depth > 25 && flood_depth <= 70) {
+    _return += "C";
+  } else if (flood_depth > 70 && flood_depth <= 120) {
+    _return += "D";
+  } else if (flood_depth > 120 && flood_depth <= 160) {
+    _return += "E";
+  } else if (flood_depth > 160 && flood_depth <= 200) {
+    _return += "F";
+  } else if (flood_depth > 200 && flood_depth <= 300) {
+    _return += "G";
+  } else if (flood_depth > 300 && flood_depth <= 450) {
+    _return += "H";
+  } else if (flood_depth > 450) {
+    _return += "I";
+  }
+
+  return _return;
+}

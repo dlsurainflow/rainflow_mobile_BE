@@ -15,5 +15,6 @@ router.get("/", function (req, res, next) {
 
 router.get("/all", mapController.returnAll);
 router.get("/push", mapController.pushNotification);
+router.get("/summary", mapController.summary);
 
 module.exports = router;
