@@ -16,7 +16,7 @@ const options = {
 const geocoder = NodeGeocoder(options);
 
 exports.returnAll = async (req, res) => {
-  Report.findAll({
+  var report = await Report.findAll({
     raw: true,
     include: [
       {
@@ -39,17 +39,75 @@ exports.returnAll = async (req, res) => {
     ],
     order: [["updatedAt", "DESC"]],
     raw: true,
-  }).then(function (report) {
-    RAFT.findAll({
-      order: [["updatedAt", "DESC"]],
-      raw: true,
-    }).then(function (raft) {
-      res.status(200).json({
-        mobile: report,
-        raft: raft,
-      });
-    });
   });
+  var raft = await RAFT.findAll({
+    order: [["updatedAt", "DESC"]],
+    raw: true,
+  });
+
+  console.log(getRainfallRateTitle(50));
+  console.log(JSON.stringify(report));
+  for (var i = 0; i < report.length; i++) {
+    report[i].rainfall_rate_title = getRainfallRateTitle(
+      report[i].rainfall_rate
+    );
+    report[i].flood_depth_title = getFloodDepthTitle(report[i].flood_depth);
+    report[i].marker = getMarkerIcon(
+      report[i].rainfall_rate,
+      report[i].flood_depth
+    );
+  }
+
+  for (var i = 0; i < raft.length; i++) {
+    // const res = await geocoder.reverse({
+    //   lat: raft[i].latitude,
+    //   lon: raft[i].longitude,
+    // });
+    // raft[i].dataValues.address = res[0].formattedAddress;
+    raft[i].rainfall_rate_title = getRainfallRateTitle(raft[i].rainfall_rate);
+    raft[i].flood_depth_title = getFloodDepthTitle(raft[i].flood_depth);
+    raft[i].marker = getMarkerIcon(raft[i].rainfall_rate, raft[i].flood_depth);
+  }
+
+  res.status(200).json({
+    mobile: report,
+    raft: raft,
+  });
+
+  // Report.findAll({
+  //   raw: true,
+  //   include: [
+  //     {
+  //       model: User,
+  //       attributes: ["username"],
+  //     },
+  //   ],
+  //   attributes: [
+  //     "id",
+  //     "latitude",
+  //     "longitude",
+  //     "rainfall_rate",
+  //     "flood_depth",
+  //     "description",
+  //     "createdAt",
+  //     "updatedAt",
+  //     "image",
+  //     "userID",
+  //     [Sequelize.literal('"User"."username"'), "username"],
+  //   ],
+  //   order: [["updatedAt", "DESC"]],
+  //   raw: true,
+  // }).then(function (report) {
+  //   RAFT.findAll({
+  //     order: [["updatedAt", "DESC"]],
+  //     raw: true,
+  //   }).then(function (raft) {
+  //     res.status(200).json({
+  //       mobile: report,
+  //       raft: raft,
+  //     });
+  //   });
+  // });
 };
 
 exports.pushNotification = async (req, res) => {
@@ -94,18 +152,6 @@ exports.pushNotification = async (req, res) => {
 
 exports.summary = async (req, res) => {
   var _result = [];
-  var _isAuthenticated = false;
-  var token = req.header("Authorization");
-  // console.log(token);
-  if (token !== undefined) {
-    try {
-      var tokenArray = token.split(" ");
-      var decoded = jwt.verify(tokenArray[1], config.secret);
-      _isAuthenticated = true;
-    } catch (err) {
-      console.error(err);
-    }
-  }
 
   var report = await Report.findAll({
     where: {
@@ -114,7 +160,7 @@ exports.summary = async (req, res) => {
           [Op.gt]: 10,
         },
         flood_depth: {
-          [Op.gt]: 2.5,
+          [Op.gt]: 100,
         },
       },
     },
@@ -130,64 +176,16 @@ exports.summary = async (req, res) => {
       "longitude",
       "rainfall_rate",
       "flood_depth",
-      "createdAt",
       "updatedAt",
-      "description",
-      "image",
+      // "description",
+      // "image",
       "userID",
       [Sequelize.literal('"User"."username"'), "username"],
     ],
   });
-  // console.log(report.length);
-  // console.log(report[0]);
-  for (var i = 0; i < report.length; i++) {
-    const res = await geocoder.reverse({
-      lat: report[i].latitude,
-      lon: report[i].longitude,
-    });
-    var upvote = await Vote.count({
-      where: {
-        reportID: report[i].id,
-        action: "upvote",
-      },
-    });
-    var downvote = await Vote.count({
-      where: {
-        reportID: report[i].id,
-        action: "downvote",
-      },
-    });
 
-    if (_isAuthenticated === true) {
-      var _currentAction;
-      await Vote.findOne({
-        where: { reportID: report[i].id, userID: decoded.id },
-      }).then((res) => {
-        if (res === null) {
-          _currentAction = null;
-        } else _currentAction = res.action;
-      });
-
-      report[i].dataValues.current_action = _currentAction;
-    }
-    // console.log(upvote);
-    report[i].dataValues.address = res[0].formattedAddress;
-    report[i].dataValues.upvote = upvote;
-    report[i].dataValues.downvote = downvote;
-    report[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
-      report[i].rainfall_rate
-    );
-    report[i].dataValues.flood_depth_title = getFloodDepthTitle(
-      report[i].flood_depth
-    );
-    report[i].dataValues.marker = getMarkerIcon(
-      report[i].rainfall_rate,
-      report[i].flood_depth
-    );
-  }
   _result.push(report);
 
-  // console.log("raft");
   var raft = await RAFT.findAll({
     where: {
       [Op.or]: {
@@ -195,35 +193,28 @@ exports.summary = async (req, res) => {
           [Op.gt]: 10,
         },
         flood_depth: {
-          [Op.gt]: 2.5,
+          [Op.gt]: 100,
         },
       },
     },
+    attributes: [
+      "id",
+      "latitude",
+      "longitude",
+      "rainfall_rate",
+      "flood_depth",
+      "updatedAt",
+      "username",
+    ],
   });
-  for (var i = 0; i < raft.length; i++) {
-    const res = await geocoder.reverse({
-      lat: raft[i].latitude,
-      lon: raft[i].longitude,
-    });
-    // console.log(upvote);
-    raft[i].dataValues.address = res[0].formattedAddress;
-    raft[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
-      raft[i].rainfall_rate
-    );
-    raft[i].dataValues.flood_depth_title = getFloodDepthTitle(
-      raft[i].flood_depth
-    );
-    raft[i].dataValues.marker = getMarkerIcon(
-      raft[i].rainfall_rate,
-      raft[i].flood_depth
-    );
-  }
+
   _result.push(raft);
 
   res.status(200).json(_result);
 };
 
 function getRainfallRateTitle(rainfall_rate) {
+  console.log("I reached here: ", rainfall_rate);
   if (rainfall_rate === 0) {
     return "No Rain";
   } else if (rainfall_rate > 0 && rainfall_rate < 2.5) {

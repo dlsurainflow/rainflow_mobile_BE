@@ -38,6 +38,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const reportRouter = require("./routes/report");
 const mapRouter = require("./routes/map");
+const raftRouter = require("./routes/raft");
 
 // for parsing multipart/form-data
 // app.use(upload.array());
@@ -47,6 +48,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/report", reportRouter);
 app.use("/map", mapRouter);
+app.use("/raft", raftRouter);
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -123,6 +125,7 @@ app.post("/report/submit", authentication, upload, function (req, res) {
       longitude: req.body.longitude,
       rainfall_rate: req.body.rainfall_rate,
       flood_depth: req.body.flood_depth,
+      description: req.body.description,
       userID: decoded.id,
       position: point,
     })
@@ -143,6 +146,7 @@ app.post("/report/submit", authentication, upload, function (req, res) {
       longitude: req.body.longitude,
       rainfall_rate: req.body.rainfall_rate,
       flood_depth: req.body.flood_depth,
+      description: req.body.description,
       userID: decoded.id,
       image: req.file.filename,
       position: point,
