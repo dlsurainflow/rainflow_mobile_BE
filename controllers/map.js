@@ -184,6 +184,22 @@ exports.summary = async (req, res) => {
     ],
   });
 
+  
+  for (var i = 0; i < report.length; i++) {
+    // const res = await geocoder.reverse({
+    //   lat: raft[i].latitude,
+    //   lon: raft[i].longitude,
+    // });
+    // raft[i].dataValues.address = res[0].formattedAddress;
+    report[i].dataValues.rainfall_rate_title = getRainfallRateTitle(report[i].rainfall_rate);
+    report[i].dataValues.flood_depth_title = getFloodDepthTitle(report[i].flood_depth);
+    report[i].dataValues.marker = getMarkerIcon(
+      report[i].rainfall_rate,
+      report[i].flood_depth
+    );
+  }
+
+
   _result.push(report);
 
   var raft = await RAFT.findAll({
@@ -207,6 +223,24 @@ exports.summary = async (req, res) => {
       "username",
     ],
   });
+
+   for (var i = 0; i < raft.length; i++) {
+     // const res = await geocoder.reverse({
+     //   lat: raft[i].latitude,
+     //   lon: raft[i].longitude,
+     // });
+     // raft[i].dataValues.address = res[0].formattedAddress;
+     raft[i].dataValues.rainfall_rate_title = getRainfallRateTitle(raft[i].rainfall_rate);
+     raft[i].dataValues.flood_depth_title = getFloodDepthTitle(
+       raft[i].flood_depth
+     );
+     raft[i].dataValues.marker = getMarkerIcon(
+       raft[i].rainfall_rate,
+       raft[i].flood_depth
+     );
+   }
+
+  
 
   _result.push(raft);
 
