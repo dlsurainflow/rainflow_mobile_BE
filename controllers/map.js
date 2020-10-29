@@ -157,10 +157,10 @@ exports.summary = async (req, res) => {
     where: {
       [Op.or]: {
         rainfall_rate: {
-          [Op.gt]: 10,
+          [Op.gt]: 2.5,
         },
         flood_depth: {
-          [Op.gt]: 100,
+          [Op.gt]: 10,
         },
       },
     },
