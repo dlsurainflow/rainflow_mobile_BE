@@ -20,10 +20,11 @@ exports.voteReport = async (req, res) => {
       var vote = await Vote.findOne({
         where: { userID: decoded.id, reportID: req.body.reportID },
       });
+      console.log(vote);
 
       if (vote === null) {
         Vote.create({
-          userID: req.body.userID,
+          userID: decoded.id,
           reportID: req.body.reportID,
           action: req.body.action,
         })
@@ -36,7 +37,7 @@ exports.voteReport = async (req, res) => {
           },
           {
             where: {
-              reportID: req.body.reportID,
+              id: vote.id,
             },
           }
         )
