@@ -106,7 +106,8 @@ app.post("/report/submit", authentication, upload, function (req, res) {
     !req.body.latitude ||
     !req.body.longitude ||
     !req.body.flood_depth ||
-    !req.body.rainfall_rate
+    !req.body.rainfall_rate ||
+    !req.body.address
   )
     return res.status(400).send({
       status: "Error",
@@ -126,6 +127,7 @@ app.post("/report/submit", authentication, upload, function (req, res) {
       rainfall_rate: req.body.rainfall_rate,
       flood_depth: req.body.flood_depth,
       description: req.body.description,
+      address: req.body.address,
       userID: decoded.id,
       position: point,
     })
@@ -147,6 +149,7 @@ app.post("/report/submit", authentication, upload, function (req, res) {
       rainfall_rate: req.body.rainfall_rate,
       flood_depth: req.body.flood_depth,
       description: req.body.description,
+      address: req.body.address,
       userID: decoded.id,
       image: req.file.filename,
       position: point,

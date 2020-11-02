@@ -5,15 +5,6 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
-const openGeocoder = require("node-open-geocoder");
-const NodeGeocoder = require("node-geocoder");
-
-const options = {
-  provider: "openstreetmap",
-  formatter: null, // 'gpx', 'string', ...
-};
-
-const geocoder = NodeGeocoder(options);
 
 exports.returnAll = async (req, res) => {
   var report = await Report.findAll({
@@ -59,11 +50,6 @@ exports.returnAll = async (req, res) => {
   }
 
   for (var i = 0; i < raft.length; i++) {
-    // const res = await geocoder.reverse({
-    //   lat: raft[i].latitude,
-    //   lon: raft[i].longitude,
-    // });
-    // raft[i].dataValues.address = res[0].formattedAddress;
     raft[i].rainfall_rate_title = getRainfallRateTitle(raft[i].rainfall_rate);
     raft[i].flood_depth_title = getFloodDepthTitle(raft[i].flood_depth);
     raft[i].marker = getMarkerIcon(raft[i].rainfall_rate, raft[i].flood_depth);
@@ -73,41 +59,6 @@ exports.returnAll = async (req, res) => {
     mobile: report,
     raft: raft,
   });
-
-  // Report.findAll({
-  //   raw: true,
-  //   include: [
-  //     {
-  //       model: User,
-  //       attributes: ["username"],
-  //     },
-  //   ],
-  //   attributes: [
-  //     "id",
-  //     "latitude",
-  //     "longitude",
-  //     "rainfall_rate",
-  //     "flood_depth",
-  //     "description",
-  //     "createdAt",
-  //     "updatedAt",
-  //     "image",
-  //     "userID",
-  //     [Sequelize.literal('"User"."username"'), "username"],
-  //   ],
-  //   order: [["updatedAt", "DESC"]],
-  //   raw: true,
-  // }).then(function (report) {
-  //   RAFT.findAll({
-  //     order: [["updatedAt", "DESC"]],
-  //     raw: true,
-  //   }).then(function (raft) {
-  //     res.status(200).json({
-  //       mobile: report,
-  //       raft: raft,
-  //     });
-  //   });
-  // });
 };
 
 exports.pushNotification = async (req, res) => {
@@ -177,28 +128,24 @@ exports.summary = async (req, res) => {
       "rainfall_rate",
       "flood_depth",
       "updatedAt",
-      // "description",
-      // "image",
+      "address",
       "userID",
       [Sequelize.literal('"User"."username"'), "username"],
     ],
   });
 
-  
   for (var i = 0; i < report.length; i++) {
-    // const res = await geocoder.reverse({
-    //   lat: raft[i].latitude,
-    //   lon: raft[i].longitude,
-    // });
-    // raft[i].dataValues.address = res[0].formattedAddress;
-    report[i].dataValues.rainfall_rate_title = getRainfallRateTitle(report[i].rainfall_rate);
-    report[i].dataValues.flood_depth_title = getFloodDepthTitle(report[i].flood_depth);
+    report[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
+      report[i].rainfall_rate
+    );
+    report[i].dataValues.flood_depth_title = getFloodDepthTitle(
+      report[i].flood_depth
+    );
     report[i].dataValues.marker = getMarkerIcon(
       report[i].rainfall_rate,
       report[i].flood_depth
     );
   }
-
 
   _result.push(report);
 
@@ -220,27 +167,23 @@ exports.summary = async (req, res) => {
       "rainfall_rate",
       "flood_depth",
       "updatedAt",
+      "address",
       "username",
     ],
   });
 
-   for (var i = 0; i < raft.length; i++) {
-     // const res = await geocoder.reverse({
-     //   lat: raft[i].latitude,
-     //   lon: raft[i].longitude,
-     // });
-     // raft[i].dataValues.address = res[0].formattedAddress;
-     raft[i].dataValues.rainfall_rate_title = getRainfallRateTitle(raft[i].rainfall_rate);
-     raft[i].dataValues.flood_depth_title = getFloodDepthTitle(
-       raft[i].flood_depth
-     );
-     raft[i].dataValues.marker = getMarkerIcon(
-       raft[i].rainfall_rate,
-       raft[i].flood_depth
-     );
-   }
-
-  
+  for (var i = 0; i < raft.length; i++) {
+    raft[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
+      raft[i].rainfall_rate
+    );
+    raft[i].dataValues.flood_depth_title = getFloodDepthTitle(
+      raft[i].flood_depth
+    );
+    raft[i].dataValues.marker = getMarkerIcon(
+      raft[i].rainfall_rate,
+      raft[i].flood_depth
+    );
+  }
 
   _result.push(raft);
 
@@ -248,7 +191,6 @@ exports.summary = async (req, res) => {
 };
 
 function getRainfallRateTitle(rainfall_rate) {
-  console.log("I reached here: ", rainfall_rate);
   if (rainfall_rate === 0) {
     return "No Rain";
   } else if (rainfall_rate > 0 && rainfall_rate < 2.5) {
