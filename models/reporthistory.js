@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       downvote: DataTypes.JSON,
       image: DataTypes.STRING,
       description: DataTypes.STRING,
+      address: DataTypes.STRING,
     },
     {
       sequelize,

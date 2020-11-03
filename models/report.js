@@ -24,11 +24,12 @@ module.exports = (sequelize, DataTypes) => {
       image: DataTypes.STRING,
       position: DataTypes.GEOMETRY("POINT", 4326),
       description: DataTypes.STRING,
+      address: DataTypes.STRING,
     },
     {
       sequelize,
       modelName: "Report",
-      timestampe: true,
+      timestamp: true,
     }
   );
   return Report;

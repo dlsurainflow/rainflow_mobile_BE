@@ -126,6 +126,7 @@ app.post("/report/submit", authentication, upload, function (req, res) {
       rainfall_rate: req.body.rainfall_rate,
       flood_depth: req.body.flood_depth,
       description: req.body.description,
+      address: req.body.address,
       userID: decoded.id,
       position: point,
     })
@@ -147,6 +148,7 @@ app.post("/report/submit", authentication, upload, function (req, res) {
       rainfall_rate: req.body.rainfall_rate,
       flood_depth: req.body.flood_depth,
       description: req.body.description,
+      address: req.body.address,
       userID: decoded.id,
       image: req.file.filename,
       position: point,
