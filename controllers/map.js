@@ -26,6 +26,7 @@ exports.returnAll = async (req, res) => {
       "updatedAt",
       "image",
       "userID",
+      "address",
       [Sequelize.literal('"User"."username"'), "username"],
       [Sequelize.literal('"User"."points"'), "points"],
     ],
