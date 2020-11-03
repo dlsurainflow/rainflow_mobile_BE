@@ -106,8 +106,7 @@ app.post("/report/submit", authentication, upload, function (req, res) {
     !req.body.latitude ||
     !req.body.longitude ||
     !req.body.flood_depth ||
-    !req.body.rainfall_rate ||
-    !req.body.address
+    !req.body.rainfall_rate
   )
     return res.status(400).send({
       status: "Error",
