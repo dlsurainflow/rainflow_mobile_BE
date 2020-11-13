@@ -280,52 +280,47 @@ exports.changePassword = async (req, res) => {
 
 exports.authenticate = async (req, res) => {
   try {
-    await User.findOne({ where: { username: req.body.username } }).then(
-      (user) => {
-        if (!user) {
-          res.status(400).send({
-            status: "Error",
-            message: "Cannot login with provided credentials",
-          });
-        }
-
-        if (
-          bcrypt.compareSync(
-            SHA256(req.body.password).toString(),
-            user.password
-          )
-        ) {
-          const token = jwt.sign({ id: user.id }, config.secret, {
-            expiresIn: "30d",
-          });
-          // var badgeImg;
-          // if (user.points < 25) badgeImg = "0.png";
-          // else if (user.points >= 25 && user.points < 50) badgeImg = "1.png";
-          // else if (user.points >= 50 && user.points < 75) badgeImg = "2.png";
-          // else if (user.points >= 75 && user.points < 100) badgeImg = "3.png";
-          // else badgeImg = null;
-
-          res.json({
-            status: "Success",
-            data: {
-              userID: user.id,
-              username: user.username,
-              email: user.email,
-              tenantID: user.tenantID,
-              points: user.points,
-              createdAt: user.createdAt,
-              badge: getBadge(user.points),
-              token: token,
-            },
-          });
-        } else {
-          res.status(400).send({
-            status: "Error",
-            message: "Cannot login with provided credentials",
-          });
-        }
+    await User.findOne({ where: { email: req.body.email } }).then((user) => {
+      if (!user) {
+        res.status(400).send({
+          status: "Error",
+          message: "Cannot login with provided credentials",
+        });
       }
-    );
+
+      if (
+        bcrypt.compareSync(SHA256(req.body.password).toString(), user.password)
+      ) {
+        const token = jwt.sign({ id: user.id }, config.secret, {
+          expiresIn: "30d",
+        });
+        // var badgeImg;
+        // if (user.points < 25) badgeImg = "0.png";
+        // else if (user.points >= 25 && user.points < 50) badgeImg = "1.png";
+        // else if (user.points >= 50 && user.points < 75) badgeImg = "2.png";
+        // else if (user.points >= 75 && user.points < 100) badgeImg = "3.png";
+        // else badgeImg = null;
+
+        res.json({
+          status: "Success",
+          data: {
+            userID: user.id,
+            username: user.username,
+            email: user.email,
+            tenantID: user.tenantID,
+            points: user.points,
+            createdAt: user.createdAt,
+            badge: getBadge(user.points),
+            token: token,
+          },
+        });
+      } else {
+        res.status(400).send({
+          status: "Error",
+          message: "Cannot login with provided credentials",
+        });
+      }
+    });
     console.log("User: " + user);
   } catch (err) {
     console.log("Error: " + err);
