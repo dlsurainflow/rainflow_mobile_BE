@@ -44,7 +44,11 @@ const transport = nodemailer.createTransport({
 exports.create = (req, res) => {};
 
 exports.forgotPassword = async (req, res) => {
-  var email = await User.findOne({ where: { email: req.body.email } });
+  console.log(req.body.email);
+  var email = await User.findOne({
+    where: { email: { [Op.iLike]: req.body.email } },
+  });
+
   if (email === null) {
     return res.json({ status: "Success" });
   }
@@ -55,10 +59,16 @@ exports.forgotPassword = async (req, res) => {
     },
     {
       where: {
-        email: req.body.email,
+        email: email.email,
       },
     }
   );
+
+  await ResetToken.destroy({
+    where: {
+      used: 1,
+    },
+  });
 
   //Create a random reset token
   var fpSalt = crypto.randomBytes(64).toString("base64");
@@ -74,7 +84,7 @@ exports.forgotPassword = async (req, res) => {
 
   //insert token data into DB
   await ResetToken.create({
-    email: req.body.email,
+    email: email.email,
     expiration: expireDate,
     token: fpSalt,
     used: 0,
@@ -280,7 +290,9 @@ exports.changePassword = async (req, res) => {
 
 exports.authenticate = async (req, res) => {
   try {
-    await User.findOne({ where: { email: req.body.email } }).then((user) => {
+    await User.findOne({
+      where: { email: { [Op.iLike]: req.body.email } },
+    }).then((user) => {
       if (!user) {
         res.status(400).send({
           status: "Error",
@@ -314,6 +326,7 @@ exports.authenticate = async (req, res) => {
             token: token,
           },
         });
+        console.log("User: " + user);
       } else {
         res.status(400).send({
           status: "Error",
@@ -321,7 +334,6 @@ exports.authenticate = async (req, res) => {
         });
       }
     });
-    console.log("User: " + user);
   } catch (err) {
     console.log("Error: " + err);
   }
