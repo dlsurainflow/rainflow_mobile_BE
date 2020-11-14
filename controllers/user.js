@@ -99,7 +99,7 @@ exports.forgotPassword = async (req, res) => {
     subject: "RainFLOW Network: Forgot Password",
     text:
       "To reset your password, please click the link below:\n" +
-      `https://rainflow.live/reset-password/${uri}/${req.body.email}` +
+      `https://rainflow.live/reset-password/${uri}/${email.email}` +
       "\n\n" +
       "If the link doesn't work, please go to https://rainflow.live/reset-password and enter the token below: \n" +
       "Token: " +
