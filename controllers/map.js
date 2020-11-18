@@ -67,43 +67,135 @@ exports.returnAll = async (req, res) => {
 };
 
 exports.pushNotification = async (req, res) => {
-  Report.findAll({
-    where: Sequelize.where(
-      Sequelize.fn(
-        "ST_DWithin",
-        Sequelize.col("position"),
-        Sequelize.fn(
-          "ST_SetSRID",
-          Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
-          4326
-        ),
-        0.032
-      ),
-      true
-    ),
-  })
-    .then((report) => {
-      RAFT.findAll({
-        where: Sequelize.where(
+  var _result = [];
+
+  var report = await Report.findAll({
+    attributes: {
+      include: [
+        [
           Sequelize.fn(
-            "ST_DWithin",
+            "ST_Distance",
             Sequelize.col("position"),
             Sequelize.fn(
               "ST_SetSRID",
               Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
               4326
-            ),
-            0.032
+            )
           ),
-          true
+          "distance",
+        ],
+      ],
+    },
+    where: Sequelize.and(
+      Sequelize.where(
+        Sequelize.fn(
+          "ST_DWithin",
+          Sequelize.col("position"),
+          Sequelize.fn(
+            "ST_SetSRID",
+            Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
+            4326
+          ),
+          0.05
         ),
-      })
-        .then((raft) => {
-          res.status(200).json({ mobile: report, raft: raft });
-        })
-        .catch((err) => console.err(err));
-    })
-    .catch((err) => console.err(err));
+        true
+      ),
+      {
+        [Op.or]: {
+          rainfall_rate: {
+            [Op.gt]: 2.5,
+          },
+          flood_depth: {
+            [Op.gt]: 10,
+          },
+        },
+      }
+    ),
+    order: Sequelize.literal("distance ASC"),
+  });
+
+  var raft = await RAFT.findAll({
+    attributes: {
+      include: [
+        [
+          Sequelize.fn(
+            "ST_Distance",
+            Sequelize.col("position"),
+            Sequelize.fn(
+              "ST_SetSRID",
+              Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
+              4326
+            )
+          ),
+          "distance",
+        ],
+      ],
+    },
+    where: Sequelize.and(
+      Sequelize.where(
+        Sequelize.fn(
+          "ST_DWithin",
+          Sequelize.col("position"),
+          Sequelize.fn(
+            "ST_SetSRID",
+            Sequelize.fn("ST_Point", req.body.longitude, req.body.latitude),
+            4326
+          ),
+          0.05
+        ),
+        true
+      ),
+      {
+        [Op.or]: {
+          rainfall_rate: {
+            [Op.gt]: 2.5,
+          },
+          flood_depth: {
+            [Op.gt]: 10,
+          },
+        },
+      }
+    ),
+    order: Sequelize.literal("distance ASC"),
+  });
+
+  for (var i = 0; i < report.length; i++) {
+    report[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
+      report[i].rainfall_rate
+    );
+    report[i].dataValues.flood_depth_title = getFloodDepthTitle(
+      report[i].flood_depth
+    );
+    report[i].dataValues.marker = getMarkerIcon(
+      report[i].rainfall_rate,
+      report[i].flood_depth
+    );
+  }
+  // _result.push(report);
+
+  for (var i = 0; i < raft.length; i++) {
+    raft[i].dataValues.rainfall_rate_title = getRainfallRateTitle(
+      raft[i].rainfall_rate
+    );
+    raft[i].dataValues.flood_depth_title = getFloodDepthTitle(
+      raft[i].flood_depth
+    );
+    raft[i].dataValues.marker = getMarkerIcon(
+      raft[i].rainfall_rate,
+      raft[i].flood_depth
+    );
+  }
+
+  // _result.push(raft);
+
+  _result = report.concat(raft);
+  _result.sort(function (a, b) {
+    return a.dataValues.distance - b.dataValues.distance;
+  });
+  res.status(200).json(_result);
+
+  // var test = report.concat(raft);
+  // console.log(test);
 };
 
 exports.summary = async (req, res) => {
