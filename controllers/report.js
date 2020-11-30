@@ -229,21 +229,21 @@ exports.findByIDHistory = async (req, res) => {
 //       message: "Authorization token not provided.",
 //     });
 //   } else {
-    var token = req.header("Authorization");
-    var tokenArray = token.split(" ");
-    jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
-      if (err) {
-        res.status(401).send({
-          status: "Error",
-          message: err.message,
-        });
-      } else {
+//     var token = req.header("Authorization");
+//     var tokenArray = token.split(" ");
+//     jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
+//       if (err) {
+//         res.status(401).send({
+//           status: "Error",
+//           message: err.message,
+//         });
+//       } else {
         var report = await ReportHistory.findOne({
           where: { id: req.params.id },
         });
         res.status(200).json(report);
-      }
-    });
+//       }
+//     });
 //   }
 };
 
