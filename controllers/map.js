@@ -343,7 +343,7 @@ exports.returnSnapshot = async (req, res) => {
     where: [
       {
         createdAt: {
-          [Op.gte]: req.params.start_date + "T00:00:00.000Z",
+          [Op.lte]: req.params.start_date + "T00:00:00.000Z",
         },
       },
     ],
