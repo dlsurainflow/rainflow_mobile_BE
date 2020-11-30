@@ -16,6 +16,6 @@ router.get("/", function (req, res, next) {
 router.get("/all", mapController.returnAll);
 router.post("/push", mapController.pushNotification);
 router.get("/summary", mapController.summary);
-router.get("/snapshot/:start_date/:end_date ", mapController.returnSnapshot);
+router.get("/snapshot/:start_date/:end_date", mapController.returnSnapshot);
 
 module.exports = router;
