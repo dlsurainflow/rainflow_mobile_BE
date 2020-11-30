@@ -46,6 +46,7 @@ exports.returnAll = async (req, res) => {
 
   var raft = await RAFT.findAll({
     order: [["updatedAt", "DESC"]],
+    where: [{ display: 1 }],
     raw: true,
   });
 
