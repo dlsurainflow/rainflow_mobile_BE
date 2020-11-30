@@ -1,10 +1,20 @@
-const { User, RAFT, Report, Vote } = require("../models");
+const { User, RAFT, Report, ReportHistory } = require("../models");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const config = require("../config/jwt.config.js");
+
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  user: "tammy",
+  host: "RainFLOW.live",
+  database: "actorcloud",
+  password: "Inmediasres8!",
+  port: 5432,
+});
 
 exports.returnAll = async (req, res) => {
   var report = await Report.findAll({
@@ -33,13 +43,14 @@ exports.returnAll = async (req, res) => {
     order: [["updatedAt", "DESC"]],
     raw: true,
   });
+
   var raft = await RAFT.findAll({
     order: [["updatedAt", "DESC"]],
     raw: true,
   });
 
-  console.log(getRainfallRateTitle(50));
-  console.log(JSON.stringify(report));
+  // console.log(getRainfallRateTitle(50));
+  // console.log(JSON.stringify(report));
   for (var i = 0; i < report.length; i++) {
     report[i].rainfall_rate_title = getRainfallRateTitle(
       report[i].rainfall_rate
@@ -285,6 +296,90 @@ exports.summary = async (req, res) => {
   _result.push(raft);
 
   res.status(200).json(_result);
+};
+
+exports.returnSnapshot = async (req, res) => {
+  var report = await ReportHistory.findAll({
+    raw: true,
+    include: [
+      {
+        model: User,
+        attributes: ["username", "points"],
+      },
+    ],
+    attributes: [
+      "id",
+      "latitude",
+      "longitude",
+      "rainfall_rate",
+      "flood_depth",
+      "description",
+      "createdAt",
+      "updatedAt",
+      "image",
+      "upvote",
+      "downvote",
+      "userID",
+      "address",
+      [Sequelize.literal('"User"."username"'), "username"],
+      [Sequelize.literal('"User"."points"'), "points"],
+    ],
+    order: [["updatedAt", "DESC"]],
+    where: [
+      {
+        createdAt: {
+          [Op.between]: [
+            req.params.start_date + "T00:00:00.000Z",
+            req.params.end_date + "T00:00:00.000Z",
+          ],
+        },
+      },
+    ],
+    raw: true,
+  });
+
+  var raft = await RAFT.findAll({
+    where: [
+      {
+        createdAt: {
+          [Op.gte]: req.params.start_date + "T00:00:00.000Z",
+        },
+      },
+    ],
+    raw: true,
+  });
+
+  for (var i = 0; i < report.length; i++) {
+    report[i].rainfall_rate_title = getRainfallRateTitle(
+      report[i].rainfall_rate
+    );
+    report[i].flood_depth_title = getFloodDepthTitle(report[i].flood_depth);
+    report[i].marker = getMarkerIcon(
+      report[i].rainfall_rate,
+      report[i].flood_depth
+    );
+    report[i].badge = getBadge(report[i].points);
+  }
+
+  for (var i = 0; i < raft.length; i++) {
+    var sql_FD1 = `select data.value->'time' as time, data.value->'value' as value from "device_events", jsonb_each(device_events.data) AS data  where "deviceID" = '${raft[i].deviceID}' and data.key = 'FD1' and "msgTime" >= '${req.params.start_date}' and "msgTime" < '${req.params.end_date}' order by value desc limit 1;`;
+    var sql_RR1 = `select data.value->'time' as time, data.value->'value' as value from "device_events", jsonb_each(device_events.data) AS data  where "deviceID" = '${raft[i].deviceID}' and data.key = 'RR1' and "msgTime" >= '${req.params.start_date}' and "msgTime" < '${req.params.end_date}' order by value desc limit 1;`;
+    var FD1 = await pool.query(sql_FD1);
+    var RR1 = await pool.query(sql_RR1);
+
+    raft[i].rainfall_rate = RR1.rows[0].value;
+    raft[i].flood_depth = FD1.rows[0].value;
+    raft[i].rainfall_rate_title = getRainfallRateTitle(RR1.rows[0].value);
+    raft[i].flood_depth_title = getFloodDepthTitle(FD1.rows[0].value);
+    raft[i].marker = getMarkerIcon(RR1.rows[0].value, FD1.rows[0].value);
+    var _user = await User.findOne({ where: { username: raft[i].username } });
+    raft[i].badge = getBadge(_user.points);
+  }
+
+  res.status(200).json({
+    mobile: report,
+    raft: raft,
+  });
 };
 
 function getRainfallRateTitle(rainfall_rate) {
