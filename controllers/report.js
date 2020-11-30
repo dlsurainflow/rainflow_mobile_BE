@@ -223,12 +223,12 @@ exports.findByID = async (req, res) => {
 };
 
 exports.findByIDHistory = async (req, res) => {
-  if (req.header("Authorization") === undefined) {
-    res.status(401).send({
-      status: "Error",
-      message: "Authorization token not provided.",
-    });
-  } else {
+//   if (req.header("Authorization") === undefined) {
+//     res.status(401).send({
+//       status: "Error",
+//       message: "Authorization token not provided.",
+//     });
+//   } else {
     var token = req.header("Authorization");
     var tokenArray = token.split(" ");
     jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
@@ -244,7 +244,7 @@ exports.findByIDHistory = async (req, res) => {
         res.status(200).json(report);
       }
     });
-  }
+//   }
 };
 
 exports.findByUserID = async (req, res) => {
