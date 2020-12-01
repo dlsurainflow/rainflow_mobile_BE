@@ -223,28 +223,37 @@ exports.findByID = async (req, res) => {
 };
 
 exports.findByIDHistory = async (req, res) => {
-//   if (req.header("Authorization") === undefined) {
-//     res.status(401).send({
-//       status: "Error",
-//       message: "Authorization token not provided.",
-//     });
-//   } else {
-//     var token = req.header("Authorization");
-//     var tokenArray = token.split(" ");
-//     jwt.verify(tokenArray[1], config.secret, async function (err, decoded) {
-//       if (err) {
-//         res.status(401).send({
-//           status: "Error",
-//           message: err.message,
-//         });
-//       } else {
-        var report = await ReportHistory.findOne({
-          where: { id: req.params.id },
-        });
-        res.status(200).json(report);
-//       }
-//     });
-//   }
+  var report = await ReportHistory.findOne({
+    where: {
+      id: req.params.id,
+    },
+    include: [
+      {
+        model: User,
+        attributes: ["points"],
+      },
+    ],
+  });
+
+  if (report !== null) {
+    res.status(200).json({
+      id: report.id,
+      latitude: report.latitude,
+      longitude: report.longitude,
+      rainfall_rate: report.rainfall_rate,
+      flood_depth: report.flood_depth,
+      createdAt: report.createdAt,
+      userID: report.userID,
+      image: report.image,
+      description: report.description,
+      address: report.address,
+      badge: getBadge(report.User.points),
+      upvote: report.upvote,
+      downvote: report.downvote,
+    });
+  } else {
+    res.status(400).json({ error: "Report does not exist!" });
+  }
 };
 
 exports.findByUserID = async (req, res) => {
