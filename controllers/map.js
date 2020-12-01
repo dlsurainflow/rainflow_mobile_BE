@@ -375,6 +375,7 @@ exports.returnSnapshot = async (req, res) => {
     raft[i].marker = getMarkerIcon(RR1.rows[0].value, FD1.rows[0].value);
     var _user = await User.findOne({ where: { username: raft[i].username } });
     raft[i].badge = getBadge(_user.points);
+    raft[i].updatedAt = req.params.start_date + "T00:00:00.000Z";
   }
 
   res.status(200).json({
