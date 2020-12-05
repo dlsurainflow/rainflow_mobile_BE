@@ -329,10 +329,7 @@ exports.returnSnapshot = async (req, res) => {
     where: [
       {
         createdAt: {
-          [Op.between]: [
-            req.params.start_date + "T00:00:00.000Z",
-            req.params.end_date + "T00:00:00.000Z",
-          ],
+          [Op.between]: [req.params.start_date, req.params.end_date],
         },
       },
     ],
@@ -343,39 +340,50 @@ exports.returnSnapshot = async (req, res) => {
     where: [
       {
         createdAt: {
-          [Op.lte]: req.params.start_date + "T00:00:00.000Z",
+          [Op.lte]: req.params.start_date,
         },
       },
     ],
     raw: true,
   });
 
-  for (var i = 0; i < report.length; i++) {
-    report[i].rainfall_rate_title = getRainfallRateTitle(
-      report[i].rainfall_rate
-    );
-    report[i].flood_depth_title = getFloodDepthTitle(report[i].flood_depth);
-    report[i].marker = getMarkerIcon(
-      report[i].rainfall_rate,
-      report[i].flood_depth
-    );
-    report[i].badge = getBadge(report[i].points);
+  if (report !== null || report !== undefined) {
+    for (var i = 0; i < report.length; i++) {
+      report[i].rainfall_rate_title = getRainfallRateTitle(
+        report[i].rainfall_rate
+      );
+      report[i].flood_depth_title = getFloodDepthTitle(report[i].flood_depth);
+      report[i].marker = getMarkerIcon(
+        report[i].rainfall_rate,
+        report[i].flood_depth
+      );
+      report[i].badge = getBadge(report[i].points);
+    }
   }
 
-  for (var i = 0; i < raft.length; i++) {
-    var sql_FD1 = `select data.value->'time' as time, data.value->'value' as value from "device_events", jsonb_each(device_events.data) AS data  where "deviceID" = '${raft[i].deviceID}' and data.key = 'FD1' and "msgTime" >= '${req.params.start_date}' and "msgTime" < '${req.params.end_date}' order by value desc limit 1;`;
-    var sql_RR1 = `select data.value->'time' as time, data.value->'value' as value from "device_events", jsonb_each(device_events.data) AS data  where "deviceID" = '${raft[i].deviceID}' and data.key = 'RR1' and "msgTime" >= '${req.params.start_date}' and "msgTime" < '${req.params.end_date}' order by value desc limit 1;`;
-    var FD1 = await pool.query(sql_FD1);
-    var RR1 = await pool.query(sql_RR1);
+  if (raft !== null || raft !== undefined) {
+    for (var i = 0; i < raft.length; i++) {
+      var sql_FD1 = `select data.value->'time' as time, data.value->'value' as value from "device_events", jsonb_each(device_events.data) AS data  where "deviceID" = '${raft[i].deviceID}' and data.key = 'FD1' and "msgTime" >= '${req.params.start_date}' and "msgTime" < '${req.params.end_date}' order by value desc limit 1;`;
+      var sql_RR1 = `select data.value->'time' as time, data.value->'value' as value from "device_events", jsonb_each(device_events.data) AS data  where "deviceID" = '${raft[i].deviceID}' and data.key = 'RR1' and "msgTime" >= '${req.params.start_date}' and "msgTime" < '${req.params.end_date}' order by value desc limit 1;`;
+      var FD1 = await pool.query(sql_FD1);
+      var RR1 = await pool.query(sql_RR1);
+      // console.log("FD1", FD1);
 
-    raft[i].rainfall_rate = RR1.rows[0].value;
-    raft[i].flood_depth = FD1.rows[0].value;
-    raft[i].rainfall_rate_title = getRainfallRateTitle(RR1.rows[0].value);
-    raft[i].flood_depth_title = getFloodDepthTitle(FD1.rows[0].value);
-    raft[i].marker = getMarkerIcon(RR1.rows[0].value, FD1.rows[0].value);
-    var _user = await User.findOne({ where: { username: raft[i].username } });
-    raft[i].badge = getBadge(_user.points);
-    raft[i].updatedAt = req.params.start_date + "T00:00:00.000Z";
+      if (FD1.rows.length !== 0 && RR1.rows.length) {
+        raft[i].rainfall_rate = RR1.rows[0].value;
+        raft[i].flood_depth = FD1.rows[0].value;
+        raft[i].rainfall_rate_title = getRainfallRateTitle(RR1.rows[0].value);
+        raft[i].flood_depth_title = getFloodDepthTitle(FD1.rows[0].value);
+        raft[i].marker = getMarkerIcon(RR1.rows[0].value, FD1.rows[0].value);
+        var _user = await User.findOne({
+          where: { username: raft[i].username },
+        });
+        raft[i].badge = getBadge(_user.points);
+        raft[i].updatedAt = req.params.start_date;
+      } else {
+        raft.splice(i, 1);
+      }
+    }
   }
 
   res.status(200).json({
