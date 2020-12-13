@@ -39,6 +39,7 @@ const usersRouter = require("./routes/users");
 const reportRouter = require("./routes/report");
 const mapRouter = require("./routes/map");
 const raftRouter = require("./routes/raft");
+const predictionRouter = require("./routes/prediction");
 
 // for parsing multipart/form-data
 // app.use(upload.array());
@@ -49,6 +50,7 @@ app.use("/users", usersRouter);
 app.use("/report", reportRouter);
 app.use("/map", mapRouter);
 app.use("/raft", raftRouter);
+app.use("/prediction", predictionRouter);
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
