@@ -69,8 +69,9 @@ exports.prediction = async (req, res) => {
 
   var FD_H =
     (RR_H1 * (T_H1 / T_H) * (A_H1 / A_HT) +
-    RR_H2 * (T_H2 / T_H) * (A_H2 / A_HT) +
-    RR_H3 * (T_H3 / T_H) * (A_H3 / A_HT)*10 +
+      RR_H2 * (T_H2 / T_H) * (A_H2 / A_HT) +
+      RR_H3 * (T_H3 / T_H) * (A_H3 / A_HT)) *
+      10 +
     (InFlow_H - OutFlow_H) +
     FD_H_Prev;
 
@@ -90,8 +91,9 @@ exports.prediction = async (req, res) => {
 
   var FD_M =
     (RR_M1 * (T_M1 / T_M) * (A_M1 / A_MT) +
-    RR_M2 * (T_M2 / T_M) * (A_M2 / A_MT) +
-    RR_M3 * (T_M3 / T_M) * (A_M3 / A_MT))*10 +
+      RR_M2 * (T_M2 / T_M) * (A_M2 / A_MT) +
+      RR_M3 * (T_M3 / T_M) * (A_M3 / A_MT)) *
+      10 +
     (InFlow_M - OutFlow_M) +
     FD_M_Prev;
 
@@ -104,8 +106,9 @@ exports.prediction = async (req, res) => {
 
   var FD_L =
     (RR_L1 * (T_L1 / T_L) * (A_L1 / A_LT) +
-    RR_L2 * (T_L2 / T_L) * (A_L2 / A_LT) +
-    RR_L3 * (T_L3 / T_L) * (A_L3 / A_LT))*10 +
+      RR_L2 * (T_L2 / T_L) * (A_L2 / A_LT) +
+      RR_L3 * (T_L3 / T_L) * (A_L3 / A_LT)) *
+      10 +
     (InFlow_L - OutFlow_L) +
     FD_L_Prev;
 
@@ -199,15 +202,19 @@ exports.predictionWhole = async (req, res) => {
   //   RR_L1 * T_L1 * (A_LT / A_LT) + (InFlow_L - OutFlow_L) * T_L + FD_L_Prev / 1;
 
   var FD_H =
-    (RR_H1 * (T_H1 / T_H) * (A_HT / A_HT))*10 + (InFlow_H - OutFlow_H) + FD_H_Prev;
+    RR_H1 * (T_H1 / T_H) * (A_HT / A_HT) * 10 +
+    (InFlow_H - OutFlow_H) +
+    FD_H_Prev;
 
   var FD_M =
-    (RR_M1 * (T_M1 / T_M) * (A_MT / A_MT))*10 + (InFlow_M - OutFlow_M) + FD_M_Prev;
+    RR_M1 * (T_M1 / T_M) * (A_MT / A_MT) * 10 +
+    (InFlow_M - OutFlow_M) +
+    FD_M_Prev;
 
   var FD_L =
-    (RR_L1 * (T_L1 / T_L) * (A_LT / A_LT))*10 + (InFlow_L - OutFlow_L) + FD_L_Prev;
-
-
+    RR_L1 * (T_L1 / T_L) * (A_LT / A_LT) * 10 +
+    (InFlow_L - OutFlow_L) +
+    FD_L_Prev;
 
   if (Math.sign(FD_H) === -1) FD_H = 0;
   if (Math.sign(FD_M) === -1) FD_M = 0;
